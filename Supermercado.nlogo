@@ -6,14 +6,23 @@ particulas-own[
   vida
 ]
 
+globals[
+  step-size
+  velocity-y
+  cargavirica
+]
+
 patches-own[
   esMuro
   carga-virica
+  step-y
+  num-particles
+  carga
 ]
 
 breed [particulas particula]
 breed [personas persona]
-breed [dependientes dependiete]
+breed [dependientes dependiente]
 
 
 to setup
@@ -37,12 +46,6 @@ to setup
 
   ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [7 10 13 16 19])] [set pcolor yellow]
 
-  crt 10 [
-    set breed personas
-    set xcor 30 + who
-    set ycor 0
-  ]
-
 
   crt 5 [set breed dependientes set shape "person" set ycor 4 set color green]
   ask dependiente 0 [set xcor 7]
@@ -55,7 +58,6 @@ end
 
 to go
 
-
 end
 
 to gravedad-particula
@@ -65,7 +67,7 @@ end
 to mov-particula
  ask particulas[
     let step-x vel-x * step-size * 0.1
-    let setp-y (velocity-y - wind) * setp-size * 0.1
+    let setp-y (velocity-y - wind) * step-size * 0.1
     if vida = maxTiempo [die]
     let new-x xcor + step-x
     let new-y ycor + step-y
@@ -82,7 +84,7 @@ to calcular-fuerzas
     set force-x 0
     set force-y 0
     gravedad-particula
-    set vida vida +1
+    set vida vida + 1
   ]
 end
 
@@ -156,16 +158,106 @@ NIL
 1
 
 SLIDER
-45
-212
-217
-245
+48
+147
+220
+180
 wind
 wind
 0
 1
 0.5
 0.1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+48
+185
+220
+218
+maxTiempo
+maxTiempo
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+50
+227
+222
+260
+Aforo
+Aforo
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+48
+271
+220
+304
+población
+población
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+47
+321
+219
+354
+%_de_contagio
+%_de_contagio
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+47
+369
+219
+402
+%_de_guantes
+%_de_guantes
+0
+100
+51.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+46
+411
+218
+444
+%_de_mascarillas
+%_de_mascarillas
+0
+100
+50.0
+1
 1
 NIL
 HORIZONTAL
