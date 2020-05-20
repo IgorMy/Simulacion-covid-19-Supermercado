@@ -9,7 +9,6 @@ particulas-own[
 globals[
   step-size
   velocity-y
-  cargavirica
 ]
 
 patches-own[
@@ -23,7 +22,7 @@ patches-own[
 breed [particulas particula]
 breed [personas persona]
 breed [dependientes dependiente]
-
+turtles-own[posicionx posiciony]; propiedad extra para las tortugas
 
 to setup
   ca
@@ -43,16 +42,17 @@ to setup
 
   ask patches with [pcolor = blue] [set esMuro true] ; Asignar muros
 
+  ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
 
-  ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [7 10 13 16 19])] [set pcolor yellow]
-
+  ask patches with [pcolor = green] [sprout 1]
+  ask turtles [set breed personas set posicionx xcor set posiciony ycor set heading -90 set color 97]
 
   crt 5 [set breed dependientes set shape "person" set ycor 4 set color green]
-  ask dependiente 0 [set xcor 7]
-  ask dependiente 1 [set xcor 11]
-  ask dependiente 2 [set xcor 15]
-  ask dependiente 3 [set xcor 19]
-  ask dependiente 4 [set xcor 23]
+  ask dependiente 100 [set xcor 7]
+  ask dependiente 101 [set xcor 11]
+  ask dependiente 102 [set xcor 15]
+  ask dependiente 103 [set xcor 19]
+  ask dependiente 104 [set xcor 23]
 
 end
 
@@ -72,7 +72,7 @@ to mov-particula
     let new-x xcor + step-x
     let new-y ycor + step-y
     if esMuro [ ; Entra en contacto con el muro
-      set carga-virica cargavirica + 1 ; Aumenta la carga virica
+      set carga-virica carga-virica + 1 ; Aumenta la carga virica
       set pcolor red
       die  ; La particula se adhiere a la superficie
     ]
@@ -114,13 +114,13 @@ to respira
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-292
+197
 10
-1497
-647
+1285
+586
 -1
 -1
-29.93
+27.0
 1
 10
 1
@@ -141,10 +141,10 @@ ticks
 30.0
 
 BUTTON
-57
-80
-120
-113
+8
+10
+71
+43
 NIL
 setup
 NIL
@@ -158,10 +158,10 @@ NIL
 1
 
 SLIDER
-48
-147
-220
-180
+9
+53
+181
+86
 wind
 wind
 0
@@ -173,10 +173,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-48
-185
-220
-218
+9
+91
+181
+124
 maxTiempo
 maxTiempo
 0
@@ -188,40 +188,40 @@ NIL
 HORIZONTAL
 
 SLIDER
-50
+11
+133
+183
+166
+Aforo
+Aforo
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+9
+177
+181
+210
+población
+población
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+8
 227
-222
+180
 260
-Aforo
-Aforo
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-48
-271
-220
-304
-población
-población
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-47
-321
-219
-354
 %_de_contagio
 %_de_contagio
 0
@@ -233,10 +233,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-47
-369
-219
-402
+8
+275
+180
+308
 %_de_guantes
 %_de_guantes
 0
@@ -248,10 +248,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-46
-411
-218
-444
+7
+317
+179
+350
 %_de_mascarillas
 %_de_mascarillas
 0
@@ -261,6 +261,23 @@ SLIDER
 1
 NIL
 HORIZONTAL
+
+BUTTON
+80
+10
+143
+43
+NIL
+go\n
+T
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## WHAT IS IT?
