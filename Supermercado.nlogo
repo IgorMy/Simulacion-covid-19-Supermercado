@@ -12,6 +12,9 @@ patches-own[
 ]
 
 breed [particulas particula]
+breed [personas persona]
+breed [dependientes dependiete]
+
 
 to setup
   ca
