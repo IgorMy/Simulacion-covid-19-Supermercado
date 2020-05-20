@@ -2,14 +2,13 @@ to setup
   ca
   ask patches [ifelse pxcor = 0 or pycor = 0 or pxcor = max-pxcor or pycor = max-pycor [set pcolor black] [set pcolor 9] ] ; paredes y el interior
   ask patches [if pxcor > 0 and pxcor < 5 and pycor = 0 [set pcolor 9]] ; puerta
-  ask patches with [pycor > 7 and pycor < 18 and (member? pxcor [4 5 8 9 12 13 16 17])] [set pcolor blue] ; estanterias interiores
+  ask patches with [pycor > 7 and pycor < 18 and (member? pxcor [4 5 8 9 12 13 16 17 20 21 24 25])] [set pcolor blue] ; estanterias interiores
   ask patches with [pxcor = 1 and (member? pycor [8 9 10 11 12 13 14 17 18 19])] [set pcolor blue]; pared izquierda
   ask patches with [pycor = 19 and (member? pxcor [2 3 4 5  8 9 10 11 12 13 14 15 16 17 20 21 22 23 24 25 26])] [set pcolor blue]; pared superior
-  ask patches with [pxcor = 28 and pycor > 1 and pycor < 19] [set pcolor blue]; pared izquierda
-  ask patches with [ (pycor > 11 and pycor < 18) or (pycor > 2 and pycor < 10) and (member? pxcor [20 21 24 25])] [set pcolor blue] ; estanterias interiores2
+  ask patches with [pxcor = 28 and pycor > 7 and pycor < 19] [set pcolor blue]; pared derecha
 
 
-  ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [5 8 11 14 17])] [set pcolor yellow]
+  ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [7 10 13 16 19])] [set pcolor yellow]
 
   crt 5 [set shape "person" set ycor 4 set color green]
   ask turtle 0 [set xcor 6]
@@ -21,10 +20,10 @@ to setup
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-219
-25
-1124
-661
+292
+10
+1197
+647
 -1
 -1
 29.93
