@@ -1,6 +1,13 @@
 to setup
   ca
-  ask patches [ifelse pxcor = 0 or pycor = 0 or pxcor = max-pxcor or pycor = max-pycor [set pcolor black] [set pcolor 9] ] ; paredes y el interior
+  ; dibujado de paredes
+  ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
+  ask patches [if pxcor >= 1 and pycor >= 1 and pxcor <= 28 and pycor <= max-pycor - 1 [set pcolor 9] ] ; suelo
+  ask patches [if pxcor >= 30 and pycor >= 0 and pxcor <= max-pxcor and pycor <=  [set pcolor green] ] ; suelo para la población
+  ask patches [if pxcor >= 30 and pycor >= 11 and pxcor <= max-pxcor and pycor <= 15 [set pcolor 45] ] ; UCI
+  ask patches [if pxcor >= 30 and pycor >= 16 and pxcor <= max-pxcor and pycor <= 20 [set pcolor 3] ] ; UCI
+
+  ; interior del supermercado
   ask patches [if pxcor > 0 and pxcor < 5 and pycor = 0 [set pcolor 9]] ; puerta
   ask patches with [pycor > 7 and pycor < 18 and (member? pxcor [4 5 8 9 12 13 16 17 20 21 24 25])] [set pcolor blue] ; estanterias interiores
   ask patches with [pxcor = 1 and (member? pycor [8 9 10 11 12 13 14 17 18 19])] [set pcolor blue]; pared izquierda
@@ -8,22 +15,22 @@ to setup
   ask patches with [pxcor = 28 and pycor > 7 and pycor < 19] [set pcolor blue]; pared derecha
 
 
-  ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [ 8 11 14 17])] [set pcolor yellow]
+  ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
 
   crt 5 [set shape "person" set ycor 4 set color green]
-  ask turtle 0 [set xcor 6]
-  ask turtle 1 [set xcor 9]
-  ask turtle 2 [set xcor 12]
-  ask turtle 3 [set xcor 15]
-  ask turtle 4 [set xcor 18]
+  ask turtle 0 [set xcor 7]
+  ask turtle 1 [set xcor 11]
+  ask turtle 2 [set xcor 15]
+  ask turtle 3 [set xcor 19]
+  ask turtle 4 [set xcor 23]
 
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 292
 10
-1197
-647
+1496
+646
 -1
 -1
 29.93
@@ -37,7 +44,7 @@ GRAPHICS-WINDOW
 0
 1
 0
-29
+39
 0
 20
 0
