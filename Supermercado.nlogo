@@ -1,5 +1,17 @@
-breed[personas persona]
-breed[dependientes dependiente]
+particulas-own[
+  vel-x ; Velocidad eje X
+  vel-y ; Velocidad eje Y
+  force-x ; Fuerza eje X
+  force-y ; Fuerza eje X
+  vida
+]
+
+patches-own[
+  esMuro
+  carga-virica
+]
+
+breed [particulas particula]
 
 to setup
   ca
@@ -17,8 +29,10 @@ to setup
   ask patches with [pycor = 19 and (member? pxcor [2 3 4 5  8 9 10 11 12 13 14 15 16 17 20 21 22 23 24 25 26])] [set pcolor blue]; pared superior
   ask patches with [pxcor = 28 and pycor > 7 and pycor < 19] [set pcolor blue]; pared derecha
 
+  ask patches with [pcolor = blue] [set esMuro true] ; Asignar muros
 
-  ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
+
+  ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [7 10 13 16 19])] [set pcolor yellow]
 
   crt 10 [
     set breed personas
@@ -34,6 +48,64 @@ to setup
   ask dependiente 3 [set xcor 19]
   ask dependiente 4 [set xcor 23]
 
+end
+
+to go
+
+
+end
+
+to gravedad-particula
+  set force-y force-y - wind
+end
+
+to mov-particula
+ ask particulas[
+    let step-x vel-x * step-size * 0.1
+    let setp-y (velocity-y - wind) * setp-size * 0.1
+    if vida = maxTiempo [die]
+    let new-x xcor + step-x
+    let new-y ycor + step-y
+    if esMuro [ ; Entra en contacto con el muro
+      set carga-virica cargavirica + 1 ; Aumenta la carga virica
+      set pcolor red
+      die  ; La particula se adhiere a la superficie
+    ]
+  ]
+end
+
+to calcular-fuerzas
+  ask particulas[
+    set force-x 0
+    set force-y 0
+    gravedad-particula
+    set vida vida +1
+  ]
+end
+
+to estornuda
+  hatch-particulas num-particles * 0.05 * carga [
+    set vel-x 10 - (random-float 20) ; velocidad x inicial
+    set vel-y 10 - (random-float 20) ; velocidad y inicial
+    set vida 0
+    set color random 255
+    set shape "circle"
+    set size 0.5
+    set label ""
+  ]
+end
+
+to respira
+
+  hatch-particulas num-particles * 0.05 * carga [
+    set vel-x 10 - (random-float 20) ; velocidad x inicial
+    set vel-y 5 - (random-float 10) ; velocidad y inicial
+    set vida 0
+    set color red
+    set shape "square"
+    set size 0.4
+    set label ""
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -79,6 +151,21 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+45
+212
+217
+245
+wind
+wind
+0
+1
+0.5
+0.1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
