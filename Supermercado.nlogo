@@ -1,3 +1,6 @@
+breed[personas persona]
+breed[dependientes dependiente]
+
 to setup
   ca
   ; dibujado de paredes
@@ -5,7 +8,7 @@ to setup
   ask patches [if pxcor >= 1 and pycor >= 1 and pxcor <= 28 and pycor <= max-pycor - 1 [set pcolor 9] ] ; suelo
   ask patches [if pxcor >= 30 and pycor >= 0 and pxcor <= max-pxcor and pycor <= 9 [set pcolor green] ] ; suelo para la población
   ask patches [if pxcor >= 30 and pycor >= 10 and pxcor <= max-pxcor and pycor <= 15 [set pcolor 45] ] ; UCI
-  ask patches [if pxcor >= 30 and pycor >= 16 and pxcor <= max-pxcor and pycor <= 20 [set pcolor 3] ] ; UCI
+  ask patches [if pxcor >= 30 and pycor >= 16 and pxcor <= max-pxcor and pycor <= 20 [set pcolor 3] ] ; cementerio
 
   ; interior del supermercado
   ask patches [if pxcor > 0 and pxcor < 5 and pycor = 0 [set pcolor 9]] ; puerta
@@ -17,20 +20,27 @@ to setup
 
   ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
 
-  crt 5 [set shape "person" set ycor 4 set color green]
-  ask turtle 0 [set xcor 7]
-  ask turtle 1 [set xcor 11]
-  ask turtle 2 [set xcor 15]
-  ask turtle 3 [set xcor 19]
-  ask turtle 4 [set xcor 23]
+  crt 10 [
+    set breed personas
+    set xcor 30 + who
+    set ycor 0
+  ]
+
+
+  crt 5 [set breed dependientes set shape "person" set ycor 4 set color green]
+  ask dependiente 0 [set xcor 7]
+  ask dependiente 1 [set xcor 11]
+  ask dependiente 2 [set xcor 15]
+  ask dependiente 3 [set xcor 19]
+  ask dependiente 4 [set xcor 23]
 
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 292
 10
-1496
-646
+1497
+647
 -1
 -1
 29.93
