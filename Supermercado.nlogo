@@ -22,7 +22,6 @@ patches-own[
 breed [particulas particula]
 breed [personas persona]
 breed [dependientes dependiente]
-turtles-own[posicionx posiciony]; propiedad extra para las tortugas
 
 to setup
   ca
@@ -44,15 +43,16 @@ to setup
 
   ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
 
-  ask patches with [pcolor = green] [sprout 1]
-  ask turtles [set breed personas set posicionx xcor set posiciony ycor set heading -90 set color 97]
+  crt 5 [set breed dependientes set shape "person" set ycor 4 set color green set xcor 7 + who * 4]
 
-  crt 5 [set breed dependientes set shape "person" set ycor 4 set color green]
-  ask dependiente 100 [set xcor 7]
-  ask dependiente 101 [set xcor 11]
-  ask dependiente 102 [set xcor 15]
-  ask dependiente 103 [set xcor 19]
-  ask dependiente 104 [set xcor 23]
+  crt población [
+    set breed personas
+    set heading -90
+    set color 87
+    move-to one-of patches with [pcolor = green]
+  ]
+
+
 
 end
 
@@ -158,10 +158,10 @@ NIL
 1
 
 SLIDER
-9
-53
-181
-86
+0
+373
+172
+406
 wind
 wind
 0
@@ -173,10 +173,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-91
-181
-124
+0
+411
+172
+444
 maxTiempo
 maxTiempo
 0
@@ -188,10 +188,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-11
-133
-183
-166
+2
+453
+174
+486
 Aforo
 Aforo
 0
@@ -204,14 +204,14 @@ HORIZONTAL
 
 SLIDER
 9
-177
+60
 181
-210
+93
 población
 población
-0
-100
-50.0
+50
+500
+500.0
 1
 1
 NIL
