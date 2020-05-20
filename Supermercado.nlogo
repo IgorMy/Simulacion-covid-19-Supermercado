@@ -82,7 +82,7 @@ to apply-forces
  ask particulas[
     let step-x vel-x * step-size * 0.1
     let step-y (vel-y - wind) * step-size * 0.1
-    if vida = maxTiempo [die]
+    ;if vida = maxTiempo [die]
     let new-x xcor + step-x
     let new-y ycor + step-y
     if esMuro = true [ ; Entra en contacto con el muro
@@ -112,7 +112,7 @@ to estornuda
     set vida 0
     set color random 255
     set shape "circle"
-    set size 0.5
+    set size random-float 0.3
     set label ""
   ]
 end
