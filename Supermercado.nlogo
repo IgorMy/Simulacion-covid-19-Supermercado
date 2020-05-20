@@ -8,15 +8,16 @@ particulas-own[
 
 globals[
   step-size
-  velocity-y
 ]
 
 patches-own[
   esMuro
-  carga-virica
-  step-y
-  num-particles
-  carga
+  pcarga-virica
+
+]
+
+turtles-own[
+  tcarga-virica
 ]
 
 breed [particulas particula]
@@ -25,6 +26,8 @@ breed [dependientes dependiente]
 
 to setup
   ca
+  reset-ticks
+  set step-size 0.1
   ; dibujado de paredes
   ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
   ask patches [if pxcor >= 1 and pycor >= 1 and pxcor <= 28 and pycor <= max-pycor - 1 [set pcolor 9] ] ; suelo
@@ -40,6 +43,10 @@ to setup
   ask patches with [pxcor = 28 and pycor > 7 and pycor < 19] [set pcolor blue]; pared derecha
 
   ask patches with [pcolor = blue] [set esMuro true] ; Asignar muros
+
+  ask patches [set pcarga-virica 1]
+
+
 
   ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
 
@@ -57,39 +64,49 @@ to setup
 end
 
 to go
+  if ticks = 100000 [ stop ]
 
+  ask dependientes [estornuda]
+
+  compute-forces
+  apply-forces
+
+  tick
 end
 
-to gravedad-particula
+to apply-gravity
   set force-y force-y - wind
 end
 
-to mov-particula
+to apply-forces
  ask particulas[
     let step-x vel-x * step-size * 0.1
-    let setp-y (velocity-y - wind) * step-size * 0.1
+    let step-y (vel-y - wind) * step-size * 0.1
     if vida = maxTiempo [die]
     let new-x xcor + step-x
     let new-y ycor + step-y
-    if esMuro [ ; Entra en contacto con el muro
-      set carga-virica carga-virica + 1 ; Aumenta la carga virica
+    if esMuro = true [ ; Entra en contacto con el muro
+      set pcarga-virica pcarga-virica + 1 ; Aumenta la carga virica
       set pcolor red
       die  ; La particula se adhiere a la superficie
     ]
+    if new-x >= max-pxcor or new-y >= max-pycor or new-x <= min-pxcor or new-y <= min-pycor [die]
+    setxy new-x new-y
   ]
+
 end
 
-to calcular-fuerzas
+to compute-forces
   ask particulas[
     set force-x 0
     set force-y 0
-    gravedad-particula
+    apply-gravity
     set vida vida + 1
   ]
 end
 
 to estornuda
-  hatch-particulas num-particles * 0.05 * carga [
+  hatch-particulas num-particles * 0.05 * tcarga-virica [
     set vel-x 10 - (random-float 20) ; velocidad x inicial
     set vel-y 10 - (random-float 20) ; velocidad y inicial
     set vida 0
@@ -101,8 +118,7 @@ to estornuda
 end
 
 to respira
-
-  hatch-particulas num-particles * 0.05 * carga [
+  hatch-particulas num-particles * 0.05 * tcarga-virica [
     set vel-x 10 - (random-float 20) ; velocidad x inicial
     set vel-y 5 - (random-float 10) ; velocidad y inicial
     set vida 0
@@ -116,11 +132,11 @@ end
 GRAPHICS-WINDOW
 197
 10
-1285
-586
+1698
+802
 -1
 -1
-27.0
+37.33
 1
 10
 1
@@ -278,6 +294,21 @@ NIL
 NIL
 NIL
 1
+
+SLIDER
+4
+497
+176
+530
+num-particles
+num-particles
+30
+100
+43.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
