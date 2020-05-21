@@ -18,17 +18,23 @@ patches-own[
 
 turtles-own[
   tcarga-virica
+  lista-de-la-compra
+  posicion-cercana-del-objeto
 ]
 
 breed [particulas particula]
 breed [personas persona]
 breed [dependientes dependiente]
 
+; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; setup
+
 to setup
-  ca
-  reset-ticks
-  set step-size 0.1
+  ca ; Limpiar la pantalla
+  reset-ticks ; se ponen los tick a 0
+  set step-size 0.07 ; movimiento de las particulas
   ; dibujado de paredes
+
   ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
   ask patches [if pxcor >= 1 and pycor >= 1 and pxcor <= 28 and pycor <= max-pycor - 1 [set pcolor 9] ] ; suelo
   ask patches [if pxcor >= 30 and pycor >= 0 and pxcor <= max-pxcor and pycor <= 9 [set pcolor green] ] ; suelo para la población
@@ -53,21 +59,24 @@ to setup
   crt 5 [set breed dependientes set shape "person" set ycor 4 set color green set xcor 7 + who * 4]
 
   crt población [
+    set lista-de-la-compra []
     set breed personas
     set heading -90
     set color 87
     move-to one-of patches with [pcolor = green]
   ]
 
-
+  ask turtle 5 [set lista-de-la-compra [2 3]]
 
 end
 
+; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; go
+
 to go
   if ticks = 100000 [ stop ]
-
   ask dependientes [estornuda]
-
+  ask turtles with [breed = personas and not empty? lista-de-la-compra] [moverse]
   compute-forces
   apply-forces
 
@@ -82,7 +91,7 @@ to apply-forces
  ask particulas[
     let step-x vel-x * step-size * 0.1
     let step-y (vel-y - wind) * step-size * 0.1
-    ;if vida = maxTiempo [die]
+    if vida = maxTiempo [die]
     let new-x xcor + step-x
     let new-y ycor + step-y
     if esMuro = true [ ; Entra en contacto con el muro
@@ -90,7 +99,7 @@ to apply-forces
       set pcolor red
       die  ; La particula se adhiere a la superficie
     ]
-    if new-x >= max-pxcor or new-y >= max-pycor or new-x <= min-pxcor or new-y <= min-pycor [die]
+    if new-x >= 29 or new-y >= max-pycor or new-x <= min-pxcor or new-y <= min-pycor [die]
     setxy new-x new-y
   ]
 
@@ -113,6 +122,7 @@ to estornuda
     set color random 255
     set shape "circle"
     set size random-float 0.3
+    set color red
     set label ""
   ]
 end
@@ -128,15 +138,30 @@ to respira
     set label ""
   ]
 end
+
+; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; moverse - como si fuera un arbol de decisiones
+
+to moverse
+  ifelse xcor > 29 [set xcor random 4 + 1 set ycor 0] [moverse-arriba]
+end
+
+to moverse-arriba
+  ifelse ycor < 6 [ set heading 0 set ycor ycor + 1 ] [moverse-horizontal1]
+end
+
+to moverse-horizontal1
+
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 197
 10
-1698
-802
+1308
+598
 -1
 -1
-37.33
+27.58
 1
 10
 1
@@ -175,9 +200,9 @@ NIL
 
 SLIDER
 0
-373
+353
 172
-406
+386
 wind
 wind
 0
@@ -190,9 +215,9 @@ HORIZONTAL
 
 SLIDER
 0
-411
+391
 172
-444
+424
 maxTiempo
 maxTiempo
 0
@@ -204,25 +229,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-2
-453
-174
-486
+8
+128
+180
+161
 Aforo
 Aforo
-0
-100
-50.0
+10
+50
+10.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-9
-60
-181
-93
+8
+55
+180
+88
 población
 población
 50
@@ -235,9 +260,9 @@ HORIZONTAL
 
 SLIDER
 8
-227
+207
 180
-260
+240
 %_de_contagio
 %_de_contagio
 0
@@ -250,9 +275,9 @@ HORIZONTAL
 
 SLIDER
 8
-275
+255
 180
-308
+288
 %_de_guantes
 %_de_guantes
 0
@@ -265,9 +290,9 @@ HORIZONTAL
 
 SLIDER
 7
-317
+297
 179
-350
+330
 %_de_mascarillas
 %_de_mascarillas
 0
@@ -296,15 +321,15 @@ NIL
 1
 
 SLIDER
-4
-497
-176
-530
+9
+91
+181
+124
 num-particles
 num-particles
 30
 100
-43.0
+31.0
 1
 1
 NIL
