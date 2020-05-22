@@ -19,7 +19,7 @@ patches-own[
 turtles-own[
   tcarga-virica
   lista-de-la-compra
-  posicion-cercana-del-objeto
+  posicion-objetivo
 ]
 
 breed [particulas particula]
@@ -43,9 +43,9 @@ to setup
 
   ; interior del supermercado
   ask patches [if pxcor > 0 and pxcor < 5 and pycor = 0 [set pcolor 9]] ; puerta
-  ask patches with [pycor > 7 and pycor < 18 and (member? pxcor [4 5 8 9 12 13 16 17 20 21 24 25])] [set pcolor blue] ; estanterias interiores
-  ask patches with [pxcor = 1 and (member? pycor [8 9 10 11 12 13 14 17 18 19])] [set pcolor blue]; pared izquierda
-  ask patches with [pycor = 19 and (member? pxcor [2 3 4 5  8 9 10 11 12 13 14 15 16 17 20 21 22 23 24 25 26])] [set pcolor blue]; pared superior
+  ask patches with [pycor > 7 and pycor < 17 and (member? pxcor [4 5 8 9 12 13 16 17 20 21 24 25])] [set pcolor blue] ; estanterias interiores
+  ask patches with [pxcor = 1 and (member? pycor [8 9 10 11 12 13 14 17 18 ])] [set pcolor blue]; pared izquierda
+  ask patches with [pycor = 19 and (member? pxcor [3  4 5  8 9 10 11 12 13 14 15 16 17 20 21 22 23 24 25 26])] [set pcolor blue]; pared superior
   ask patches with [pxcor = 28 and pycor > 7 and pycor < 19] [set pcolor blue]; pared derecha
 
   ask patches with [pcolor = blue] [set esMuro true] ; Asignar muros
@@ -60,13 +60,14 @@ to setup
 
   crt población [
     set lista-de-la-compra []
+    set posicion-objetivo []
     set breed personas
     set heading -90
     set color 87
     move-to one-of patches with [pcolor = green]
   ]
 
-  ask turtle 5 [set lista-de-la-compra [2 3]]
+  ask turtle 5 [set lista-de-la-compra [1 8]]
 
 end
 
@@ -76,7 +77,7 @@ end
 to go
   if ticks = 100000 [ stop ]
   ask dependientes [estornuda]
-  ask turtles with [breed = personas and not empty? lista-de-la-compra] [moverse]
+  movimiento
   compute-forces
   apply-forces
 
@@ -140,17 +141,75 @@ to respira
 end
 
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
-; moverse - como si fuera un arbol de decisiones
+to movimiento
 
-to moverse
-  ifelse xcor > 29 [set xcor random 4 + 1 set ycor 0] [moverse-arriba]
+  ask personas with [not empty? lista-de-la-compra] [
+    if empty? posicion-objetivo [calcular-posicion-objetivo]
+    movimiento-entrada-supermercado
+  ]
+
 end
 
-to moverse-arriba
-  ifelse ycor < 6 [ set heading 0 set ycor ycor + 1 ] [moverse-horizontal1]
+to calcular-posicion-objetivo
+
+  let cordenada-x  first lista-de-la-compra
+  let cordenada-y item 1 lista-de-la-compra
+
+  if cordenada-y = 8 [
+    set cordenada-y 7
+  ]
+
+  if cordenada-y = 19 [
+    set cordenada-y 18
+  ]
+
+  if cordenada-y = 16 and xcor <= 25 [
+    set cordenada-y 17
+  ]
+
+  if cordenada-x = 1 and cordenada-y > 8 [
+    set cordenada-x 2;
+  ]
+
+  if cordenada-x = 28 and ycor > 8 [
+    set cordenada-x 27
+  ]
+
+  if cordenada-x >= 4 and cordenada-x <= 25 and cordenada-y > 8 and cordenada-y < 16 [
+    ask patch (cordenada-x - 1) (cordenada-y) [
+      if color = 7 [
+        set cordenada-x (cordenada-x - 1)
+      ]
+    ]
+    ask patch (cordenada-x + 1) (cordenada-y) [
+      if color = 7 [
+        set cordenada-x (cordenada-x + 1)
+      ]
+    ]
+  ]
+
+  set posicion-objetivo lput cordenada-x posicion-objetivo
+  set posicion-objetivo lput cordenada-y posicion-objetivo
+
 end
 
-to moverse-horizontal1
+to movimiento-entrada-supermercado
+
+  ifelse xcor > 29 [
+    set xcor random 4 + 1
+    set ycor 0
+    set heading 0
+    fd random 2 + 6
+  ][
+    ir-posicion-objetivo
+  ]
+
+end
+
+to ir-posicion-objetivo
+
+
+
 
 end
 @#$#@#$#@
