@@ -19,7 +19,6 @@ patches-own[
 turtles-own[
   tcarga-virica
   lista-de-la-compra
-  posicion-objetivo
 ]
 
 breed [particulas particula]
@@ -59,15 +58,13 @@ to setup
   crt 5 [set breed dependientes set shape "person" set ycor 4 set color green set xcor 7 + who * 4]
 
   crt población [
-    set lista-de-la-compra []
-    set posicion-objetivo []
     set breed personas
     set heading -90
     set color 87
     move-to one-of patches with [pcolor = green]
   ]
 
-  ask turtle 5 [set lista-de-la-compra [1 8]]
+  ask turtle 5 [set lista-de-la-compra 1 ]
 
 end
 
@@ -77,10 +74,9 @@ end
 to go
   if ticks = 100000 [ stop ]
   ask dependientes [estornuda]
-  movimiento
   compute-forces
   apply-forces
-
+  movimiento
   tick
 end
 
@@ -141,76 +137,119 @@ to respira
 end
 
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; movimiento de los agentes
+
 to movimiento
-
-  ask personas with [not empty? lista-de-la-compra] [
-    if empty? posicion-objetivo [calcular-posicion-objetivo]
-    movimiento-entrada-supermercado
-  ]
-
-end
-
-to calcular-posicion-objetivo
-
-  let cordenada-x  first lista-de-la-compra
-  let cordenada-y item 1 lista-de-la-compra
-
-  if cordenada-y = 8 [
-    set cordenada-y 7
-  ]
-
-  if cordenada-y = 19 [
-    set cordenada-y 18
-  ]
-
-  if cordenada-y = 16 and xcor <= 25 [
-    set cordenada-y 17
-  ]
-
-  if cordenada-x = 1 and cordenada-y > 8 [
-    set cordenada-x 2;
-  ]
-
-  if cordenada-x = 28 and ycor > 8 [
-    set cordenada-x 27
-  ]
-
-  if cordenada-x >= 4 and cordenada-x <= 25 and cordenada-y > 8 and cordenada-y < 16 [
-    ask patch (cordenada-x - 1) (cordenada-y) [
-      if color = 7 [
-        set cordenada-x (cordenada-x - 1)
-      ]
-    ]
-    ask patch (cordenada-x + 1) (cordenada-y) [
-      if color = 7 [
-        set cordenada-x (cordenada-x + 1)
-      ]
+  ask personas with [lista-de-la-compra > 0 or (lista-de-la-compra = 0 and xcor < 29)] [
+    if xcor > 29 [
+      set xcor random 4 + 1
+      set ycor 0
+      set heading 0
+      fd 7
+      set heading 90
+      while [xcor < 29] [movimiento-tienda]
     ]
   ]
-
-  set posicion-objetivo lput cordenada-x posicion-objetivo
-  set posicion-objetivo lput cordenada-y posicion-objetivo
-
 end
 
-to movimiento-entrada-supermercado
+to movimiento-tienda
 
-  ifelse xcor > 29 [
-    set xcor random 4 + 1
-    set ycor 0
-    set heading 0
-    fd random 2 + 6
-  ][
-    ir-posicion-objetivo
+  if lista-de-la-compra > 0 [
+    mirar-objetos-cercanos
   ]
 
+  if lista-de-la-compra = 0 and ycor = 7 [
+    salir
+  ]
+
+  if xcor = 2 and (ycor = 7 or ycor >= 17) [
+    set heading 90
+  ]
+
+  if xcor = 27 and (ycor = 7 or ycor >= 17) [
+    set heading -90
+  ]
+
+  if ycor = 7 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] [
+    if random 100 > 75 [set heading 0]
+  ]
+
+  if ycor >= 17 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] and heading != 180 [
+    if random 100 > 75 [set heading 180]
+  ]
+
+  if ycor = 18 and heading = 0 [
+    ifelse random 2 = 0 [set heading -90] [set heading 90]
+  ]
+
+  if ycor = 7 and heading = 180 [
+    ifelse random 2 = 0 [set heading -90] [set heading 90]
+  ]
+
+  fd 1
+
 end
 
-to ir-posicion-objetivo
+to mirar-objetos-cercanos
+  let x 0
+  let y 0
+  let h heading
+  ask patch-here [
+    ask neighbors4 with [pcolor = blue][
+      set x pxcor
+      set y pycor
+    ]
+  ]
+  if x != 0 and random 100 > 90 [
+    if xcor > x [
+      set heading -90
+    ]
+    if xcor < x [
+      set heading 90
+    ]
+    if ycor > y [
+      set heading 90
+    ]
 
+    if ycor < y [
+      set heading 0
+    ]
 
+    set size 1.5
+    set lista-de-la-compra lista-de-la-compra - 1
+    ask patch x y [set pcolor pcolor + 1]
+    set size 1
+    set heading h
 
+  ]
+end
 
+to salir
+  set heading 180
+  fd 1
+  let posicion (random 5 * 4) + 5
+  if xcor != posicion[
+    ifelse xcor > posicion[
+      set heading -90
+      fd xcor - posicion
+    ] [
+      set heading 90
+      fd posicion - xcor
+    ]
+    set heading 180
+    fd 2
+    set heading 90
+    set size 1.5
+    set size 1
+    set heading 180
+    fd random 2 + 2
+    set heading -90
+    fd xcor - (random 4 + 1)
+    set heading 180
+    fd ycor
+    move-to one-of patches with [pcolor = green]
+    stop
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
