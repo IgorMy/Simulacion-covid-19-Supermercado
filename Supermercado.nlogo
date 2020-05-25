@@ -72,6 +72,8 @@ to setup
 
   ask turtle 5 [set lista-de-la-compra 1 ]
 
+  crt 1 [set breed personas setxy 10 10 set tcarga-virica 1 set heading 0]
+
 end
 
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -83,11 +85,15 @@ to go
     ask one-of personas with [ xcor > 29 ][set lista-de-la-compra 3 + random 13]
     set aforo-actual aforo-actual + 1
   ]
-  ask dependientes [estornuda]
+  ;ask dependientes [estornuda]
+
+  if ticks mod 10 = 0  [ask personas[estornuda]]
+
   compute-forces
   apply-forces
-  movimiento
+  ;movimiento
   tick
+
 end
 
 to apply-gravity
@@ -125,6 +131,17 @@ to estornuda
     hatch-particulas num-particles * 0.05 * tcarga-virica [
     set vel-x 10 - (random-float 20) ; velocidad x inicial
     set vel-y 10 - (random-float 20) ; velocidad y inicial
+  let direccion heading
+  hatch-particulas num-particles * 0.1 * tcarga-virica [
+    ;show direccion
+    let acel-x 20
+    let acel-y 30
+    if direccion = 0 [set vel-x random 10  set vel-y 1 * acel-y]
+    if direccion = 90 [set vel-x 1 * acel-x  set vel-y random 10]
+    if direccion = 270 [set vel-x random 20 - 10 set vel-y -1 * acel-y]
+    if direccion = -90 [set vel-x -1 * acel-x set vel-y random 20 - 10]
+
+    ;set vel-y 10 - (random-float 20) ; velocidad y inicial
     set vida 0
     set color random 255
     set shape "circle"
@@ -394,7 +411,7 @@ wind
 wind
 0
 1
-0.5
+1.0
 0.1
 1
 NIL
@@ -409,8 +426,8 @@ maxTiempo
 maxTiempo
 0
 100
-50.0
-1
+20.0
+10
 1
 NIL
 HORIZONTAL
@@ -516,7 +533,7 @@ num-particles
 num-particles
 30
 100
-31.0
+51.0
 1
 1
 NIL
