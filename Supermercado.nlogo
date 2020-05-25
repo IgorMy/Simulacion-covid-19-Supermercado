@@ -8,6 +8,7 @@ particulas-own[
 
 globals[
   step-size
+  aforo-actual
 ]
 
 patches-own[
@@ -64,6 +65,8 @@ to setup
     move-to one-of patches with [pcolor = green]
   ]
 
+  set aforo-actual 0
+
   ask turtle 5 [set lista-de-la-compra 1 ]
 
 end
@@ -73,6 +76,10 @@ end
 
 to go
   if ticks = 100000 [ stop ]
+  if aforo-actual < aforo and random 100 > 50 [
+    ask one-of personas with [ xcor > 29 ][set lista-de-la-compra 3 + random 13]
+    set aforo-actual aforo-actual + 1
+  ]
   ask dependientes [estornuda]
   compute-forces
   apply-forces
@@ -217,7 +224,7 @@ to mirar-objetos-cercanos
 
     set size 1.5
     set lista-de-la-compra lista-de-la-compra - 1
-    ask patch x y [set pcolor pcolor + 1]
+    ;ask patch x y [set pcolor pcolor + 1]
     set size 1
     set heading h
 
@@ -248,6 +255,7 @@ to salir
     set heading 180
     fd ycor
     move-to one-of patches with [pcolor = green]
+    set aforo-actual aforo-actual - 1
     stop
   ]
 end
