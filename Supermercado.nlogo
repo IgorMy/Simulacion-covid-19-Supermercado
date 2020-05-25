@@ -20,6 +20,8 @@ patches-own[
 turtles-own[
   tcarga-virica
   lista-de-la-compra
+  estado
+  posicion-objetivo
 ]
 
 breed [particulas particula]
@@ -60,6 +62,7 @@ to setup
 
   crt población [
     set breed personas
+    set estado 0
     set heading -90
     set color 87
     move-to one-of patches with [pcolor = green]
@@ -119,7 +122,7 @@ to compute-forces
 end
 
 to estornuda
-  hatch-particulas num-particles * 0.05 * tcarga-virica [
+    hatch-particulas num-particles * 0.05 * tcarga-virica [
     set vel-x 10 - (random-float 20) ; velocidad x inicial
     set vel-y 10 - (random-float 20) ; velocidad y inicial
     set vida 0
@@ -148,14 +151,35 @@ end
 
 to movimiento
   ask personas with [lista-de-la-compra > 0 or (lista-de-la-compra = 0 and xcor < 29)] [
-    if xcor > 29 [
-      set xcor random 4 + 1
-      set ycor 0
-      set heading 0
-      fd 7
-      set heading 90
-      while [xcor < 29] [movimiento-tienda]
+    ifelse estado = 0 [
+      colocar-en-la-tienda
+    ][
+      ifelse estado = 1 [
+        movimiento-tienda-entrada
+      ][
+        ifelse estado = 2 [
+          movimiento-tienda
+        ][
+          salir
+        ]
+      ]
     ]
+  ]
+end
+
+to colocar-en-la-tienda
+  set xcor random 4 + 1
+  set ycor 0
+  set heading 0
+  set estado 1
+end
+
+to movimiento-tienda-entrada
+  ifelse ycor < 7 [
+    fd 1
+  ][
+    set estado 2
+    set heading 90
   ]
 end
 
@@ -165,36 +189,36 @@ to movimiento-tienda
     mirar-objetos-cercanos
   ]
 
-  if lista-de-la-compra = 0 and ycor = 7 [
-    salir
+  ifelse lista-de-la-compra = 0 and ycor = 7 [
+    set estado 3
+  ][
+
+    if xcor = 2 and (ycor = 7 or ycor >= 17) [
+      set heading 90
+    ]
+
+    if xcor = 27 and (ycor = 7 or ycor >= 17) [
+      set heading -90
+    ]
+
+    if ycor = 7 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] [
+      if random 100 > 75 [set heading 0]
+    ]
+
+    if ycor >= 17 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] and heading != 180 [
+      if random 100 > 75 [set heading 180]
+    ]
+
+    if ycor = 18 and heading = 0 [
+      ifelse random 2 = 0 [set heading -90] [set heading 90]
+    ]
+
+    if ycor = 7 and heading = 180 [
+      ifelse random 2 = 0 [set heading -90] [set heading 90]
+    ]
+
+    fd 1
   ]
-
-  if xcor = 2 and (ycor = 7 or ycor >= 17) [
-    set heading 90
-  ]
-
-  if xcor = 27 and (ycor = 7 or ycor >= 17) [
-    set heading -90
-  ]
-
-  if ycor = 7 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] [
-    if random 100 > 75 [set heading 0]
-  ]
-
-  if ycor >= 17 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] and heading != 180 [
-    if random 100 > 75 [set heading 180]
-  ]
-
-  if ycor = 18 and heading = 0 [
-    ifelse random 2 = 0 [set heading -90] [set heading 90]
-  ]
-
-  if ycor = 7 and heading = 180 [
-    ifelse random 2 = 0 [set heading -90] [set heading 90]
-  ]
-
-  fd 1
-
 end
 
 to mirar-objetos-cercanos
@@ -224,7 +248,7 @@ to mirar-objetos-cercanos
 
     set size 1.5
     set lista-de-la-compra lista-de-la-compra - 1
-    ;ask patch x y [set pcolor pcolor + 1]
+    ask patch x y [set pcolor pcolor + 1]
     set size 1
     set heading h
 
@@ -232,32 +256,89 @@ to mirar-objetos-cercanos
 end
 
 to salir
+  ifelse estado = 3 [
+    ir-dependiente-1
+  ][
+    ifelse estado = 4[
+      ir-dependiente-2
+    ][
+      ifelse estado = 5[
+        ir-dependiente-3
+      ][
+        ifelse estado = 6[
+          salir-1
+        ][
+          ifelse estado = 7[
+            salir-2
+          ][
+            salir-3
+          ]
+        ]
+      ]
+    ]
+  ]
+end
+
+to ir-dependiente-1
   set heading 180
   fd 1
-  let posicion (random 5 * 4) + 5
-  if xcor != posicion[
-    ifelse xcor > posicion[
-      set heading -90
-      fd xcor - posicion
-    ] [
-      set heading 90
-      fd posicion - xcor
-    ]
+  set posicion-objetivo (random 5 * 4) + 5
+  ifelse xcor != posicion-objetivo[
+    set estado 4
+     ifelse xcor > posicion-objetivo[
+          set heading -90
+        ] [
+          set heading 90
+        ]
+  ][
+    set estado 5
     set heading 180
-    fd 2
+  ]
+end
+
+to ir-dependiente-2
+  fd 1
+  if xcor = posicion-objetivo[
+    set estado 5
+    set heading 180
+  ]
+end
+
+to ir-dependiente-3
+  fd 1
+  if ycor = 4 [
     set heading 90
     set size 1.5
     set size 1
     set heading 180
-    fd random 2 + 2
-    set heading -90
-    fd xcor - (random 4 + 1)
-    set heading 180
-    fd ycor
-    move-to one-of patches with [pcolor = green]
-    set aforo-actual aforo-actual - 1
-    stop
+    set estado 6
+    set posicion-objetivo 1 + random 2
   ]
+end
+
+to salir-1
+  fd 1
+  if ycor = posicion-objetivo [
+    set posicion-objetivo random 4 + 1
+    set heading -90
+    set estado 7
+  ]
+end
+
+to salir-2
+  fd 1
+  if xcor = posicion-objetivo [
+    set estado 8
+    set heading 180
+  ]
+end
+
+to salir-3
+  fd ycor
+  set posicion-objetivo 0
+  set estado 0
+  move-to one-of patches with [pcolor = green]
+  set aforo-actual aforo-actual - 1
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
