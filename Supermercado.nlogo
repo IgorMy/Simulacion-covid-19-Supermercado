@@ -65,6 +65,9 @@ to setup
     set estado 0
     set heading -90
     set color 87
+    set tcarga-virica 1
+    set label-color black
+    set label tcarga-virica
     move-to one-of patches with [pcolor = green]
   ]
 
@@ -81,17 +84,26 @@ end
 
 to go
   if ticks = 100000 [ stop ]
+
+  if ticks mod 2 = 0 [ask patches with [pcolor = blue + 1] [set pcolor blue]] ; Reestablecer color de los objetos seleccionados
+
   if aforo-actual < aforo and random 100 > 50 [
     ask one-of personas with [ xcor > 29 ][set lista-de-la-compra 3 + random 13]
     set aforo-actual aforo-actual + 1
   ]
   ;ask dependientes [estornuda]
 
-  if ticks mod 10 = 0  [ask personas[estornuda]]
+
+  ask personas with [xcor < 29] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 set label tcarga-virica]]
+
+
+  if aforo-actual > 6 and ticks mod 5 = 0  [ask n-of random 6 personas with [ xcor < 29 ] [estornuda]]
+
+
 
   compute-forces
   apply-forces
-  ;movimiento
+  movimiento-agente
   tick
 
 end
@@ -119,20 +131,22 @@ to apply-forces
 end
 
 to compute-forces
+  let control 0
   ask particulas[
     set force-x 0
     set force-y 0
     apply-gravity
     set vida vida + 1
+    ; CONTAGIO CONTACTO PERSONAS-PARTICULAS
+    ;if vida >= 3 [ask personas in-cone 1 180 [set tcarga-virica tcarga-virica + 1 set label tcarga-virica set control 1]]
+    ;if control = 1 [die]
   ]
+
 end
 
 to estornuda
-    hatch-particulas num-particles * 0.05 * tcarga-virica [
-    set vel-x 10 - (random-float 20) ; velocidad x inicial
-    set vel-y 10 - (random-float 20) ; velocidad y inicial
   let direccion heading
-  hatch-particulas num-particles * 0.1 * tcarga-virica [
+  hatch-particulas num-particles [
     ;show direccion
     let acel-x 20
     let acel-y 30
@@ -166,7 +180,7 @@ end
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
 ; movimiento de los agentes
 
-to movimiento
+to movimiento-agente
   ask personas with [lista-de-la-compra > 0 or (lista-de-la-compra = 0 and xcor < 29)] [
     ifelse estado = 0 [
       colocar-en-la-tienda
@@ -265,7 +279,7 @@ to mirar-objetos-cercanos
 
     set size 1.5
     set lista-de-la-compra lista-de-la-compra - 1
-    ask patch x y [set pcolor pcolor + 1]
+    ask patch x y [set pcolor pcolor + 1] ; Resaltar en celeste el objeto seleccionado
     set size 1
     set heading h
 
@@ -426,7 +440,7 @@ maxTiempo
 maxTiempo
 0
 100
-20.0
+30.0
 10
 1
 NIL
@@ -531,9 +545,9 @@ SLIDER
 124
 num-particles
 num-particles
-30
-100
-51.0
+1
+20
+3.0
 1
 1
 NIL
