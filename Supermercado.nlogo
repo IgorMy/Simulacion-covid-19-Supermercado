@@ -304,7 +304,7 @@ to mirar-objetos-cercanos
     set size 1.5
     set lista-de-la-compra lista-de-la-compra - 1
     ask patch x y [if pcolor = red [set contagio 1] set pcolor pcolor + 1] ; Resaltar en celeste el objeto seleccionado
-    if guantes = false [set tcarga-virica tcarga-virica + 1 cambiar-label-color]
+    if guantes = false and contagio = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color]
     set size 1
     set heading h
 
