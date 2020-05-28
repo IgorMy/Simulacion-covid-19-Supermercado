@@ -22,6 +22,9 @@ turtles-own[
   lista-de-la-compra
   estado
   posicion-objetivo
+  guantes
+  mascarilla
+  movimiento
 ]
 
 breed [particulas particula]
@@ -62,21 +65,32 @@ to setup
 
   crt población [
     set breed personas
+    set movimiento 1
     set estado 0
     set heading -90
     set color 87
-    set tcarga-virica 1
     set label-color black
-    set label tcarga-virica
     move-to one-of patches with [pcolor = green]
+    set guantes false
+    set mascarilla false
+    set label tcarga-virica
   ]
 
   set aforo-actual 0
 
-  ask turtle 5 [set lista-de-la-compra 1 ]
+  ask n-of floor(población * %contagio_inicial / 100) personas with [color != 16 ][set tcarga-virica 1 cambiar-label-color]
+  ask n-of floor(población * %_de_guantes / 100) personas with [guantes = false ][set guantes true cambiar-label-color]
+  ask n-of floor(población * %_de_mascarillas / 100) personas with [mascarilla = false ][set mascarilla true cambiar-label-color]
 
-  crt 1 [set breed personas setxy 10 10 set tcarga-virica 1 set heading 0]
+end
 
+to cambiar-label-color
+  ifelse tcarga-virica > 0 [set color 16][set color 87]
+  let l ""
+  set l word l tcarga-virica
+  if mascarilla [set l word "M-" l ]
+  if guantes [set l word "G-" l ]
+  set label l
 end
 
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,6 +98,8 @@ end
 
 to go
   if ticks = 100000 [ stop ]
+
+  ask personas with [tcarga-virica > 0 and color != 16 ] [cambiar-label-color] ; colorear a los enfermos
 
   if ticks mod 2 = 0 [ask patches with [pcolor = blue + 1] [set pcolor blue]] ; Reestablecer color de los objetos seleccionados
 
@@ -94,7 +110,8 @@ to go
   ;ask dependientes [estornuda]
 
 
-  ask personas with [xcor < 29] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 set label tcarga-virica]]
+  ask personas with [xcor < 29] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color]]
+
 
 
   if aforo-actual > 6 and ticks mod 5 = 0  [ask n-of random 6 personas with [ xcor < 29 ] [estornuda]]
@@ -145,6 +162,7 @@ to compute-forces
 end
 
 to estornuda
+  if tcarga-virica > 0 [ ; Solucion de mierda
   let direccion heading
   hatch-particulas num-particles [
     ;show direccion
@@ -162,6 +180,7 @@ to estornuda
     set size random-float 0.3
     set color red
     set label ""
+  ]
   ]
 end
 
@@ -232,12 +251,14 @@ to movimiento-tienda
       set heading -90
     ]
 
-    if ycor = 7 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] [
-      if random 100 > 75 [set heading 0]
-    ]
+    if movimiento = 1 [
+      if ycor = 7 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] [
+        if random 100 > 75 [set heading 0 set movimiento -12]
+      ]
 
-    if ycor >= 17 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] and heading != 180 [
-      if random 100 > 75 [set heading 180]
+      if ycor >= 17 and member? xcor [2 3 6 7 10 11 14 15 18 19 22 23 26 27] and heading != 180 [
+        if random 100 > 75 [set heading 180 set movimiento -12]
+      ]
     ]
 
     if ycor = 18 and heading = 0 [
@@ -248,6 +269,8 @@ to movimiento-tienda
       ifelse random 2 = 0 [set heading -90] [set heading 90]
     ]
 
+    if movimiento < 1 [set movimiento movimiento + 1]
+
     fd 1
   ]
 end
@@ -256,8 +279,9 @@ to mirar-objetos-cercanos
   let x 0
   let y 0
   let h heading
+  let contagio 0
   ask patch-here [
-    ask neighbors4 with [pcolor = blue][
+    ask neighbors4 with [pcolor = blue or pcolor = red][
       set x pxcor
       set y pycor
     ]
@@ -279,9 +303,11 @@ to mirar-objetos-cercanos
 
     set size 1.5
     set lista-de-la-compra lista-de-la-compra - 1
-    ask patch x y [set pcolor pcolor + 1] ; Resaltar en celeste el objeto seleccionado
+    ask patch x y [if pcolor = red [set contagio 1] set pcolor pcolor + 1] ; Resaltar en celeste el objeto seleccionado
+    if guantes = false [set tcarga-virica tcarga-virica + 1 cambiar-label-color]
     set size 1
     set heading h
+
 
   ]
 end
@@ -417,10 +443,10 @@ NIL
 1
 
 SLIDER
-0
-353
-172
-386
+2
+456
+174
+489
 wind
 wind
 0
@@ -432,10 +458,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-0
-391
-172
-424
+2
+494
+174
+527
 maxTiempo
 maxTiempo
 0
@@ -447,10 +473,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-8
-128
-180
-161
+5
+166
+177
+199
 Aforo
 Aforo
 10
@@ -462,10 +488,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-8
-55
-180
-88
+6
+51
+178
+84
 población
 población
 50
@@ -477,30 +503,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-8
-207
-180
-240
+7
+394
+179
+427
 %_de_contagio
 %_de_contagio
 0
 100
-50.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-8
-255
-180
-288
-%_de_guantes
-%_de_guantes
-0
-100
-51.0
+10.0
 1
 1
 NIL
@@ -508,14 +519,29 @@ HORIZONTAL
 
 SLIDER
 7
-297
+206
 179
-330
+239
+%_de_guantes
+%_de_guantes
+0
+100
+100.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+7
+243
+179
+276
 %_de_mascarillas
 %_de_mascarillas
 0
 100
-50.0
+100.0
 1
 1
 NIL
@@ -539,15 +565,30 @@ NIL
 1
 
 SLIDER
-9
-91
-181
-124
+6
+129
+178
+162
 num-particles
 num-particles
 1
 20
 3.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+6
+90
+178
+123
+%contagio_inicial
+%contagio_inicial
+1
+100
+1.0
 1
 1
 NIL
