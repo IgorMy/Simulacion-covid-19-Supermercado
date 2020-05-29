@@ -48,14 +48,14 @@ to setup
 
   ; interior del supermercado
   ask patches [if pxcor > 0 and pxcor < 5 and pycor = 0 [set pcolor 9]] ; puerta
-  ask patches with [pycor > 7 and pycor < 17 and (member? pxcor [4 5 8 9 12 13 16 17 20 21 24 25])] [set pcolor blue] ; estanterias interiores
+  ask patches with [pycor > 7 and pycor < 17 and (member? pxcor [4 5 8 9 12 13 16 17 20 21 24 25])] [set pcolor blue ] ; estanterias interiores
   ask patches with [pxcor = 1 and (member? pycor [8 9 10 11 12 13 14 17 18 ])] [set pcolor blue]; pared izquierda
   ask patches with [pycor = 19 and (member? pxcor [3  4 5  8 9 10 11 12 13 14 15 16 17 20 21 22 23 24 25 26])] [set pcolor blue]; pared superior
   ask patches with [pxcor = 28 and pycor > 7 and pycor < 19] [set pcolor blue]; pared derecha
 
   ask patches with [pcolor = blue] [set esMuro true] ; Asignar muros
 
-  ask patches [set pcarga-virica 1]
+  ask patches [set pcarga-virica 0] ; Inicializamos la carga virica de los muros
 
 
 
@@ -101,6 +101,14 @@ to go
 
   ask personas with [tcarga-virica > 0 and color != 16 ] [cambiar-label-color] ; colorear a los enfermos
 
+  ; Colorear muros segun carga virica
+  ask patches with [esMuro = true and member? pcarga-virica (range 1 5)] [set pcolor 19]
+  ask patches with [esMuro = true and member? pcarga-virica (range 6 10)] [set pcolor 18]
+  ask patches with [esMuro = true and member? pcarga-virica (range 11 15)] [set pcolor 17]
+  ask patches with [esMuro = true and member? pcarga-virica (range 16 20)] [set pcolor 16]
+  ask patches with [esMuro = true and member? pcarga-virica (range 21 25)] [set pcolor 15]
+  ask patches with [esMuro = true and pcarga-virica > 25] [set pcolor 14]
+
   if ticks mod 2 = 0 [ask patches with [pcolor = blue + 1] [set pcolor blue]] ; Reestablecer color de los objetos seleccionados
 
   if aforo-actual < aforo and random 100 > 50 [
@@ -109,14 +117,15 @@ to go
   ]
   ;ask dependientes [estornuda]
 
-
-  ask personas with [xcor < 29] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color]]
-
-
-
-  if aforo-actual > 6 and ticks mod 5 = 0  [ask n-of random 6 personas with [ xcor < 29 ] [estornuda]]
+  ; Contagio por contacto con particula en aire. 100% si no lleva mascarilla, proba_contagio_mascarilla% si lleva.
+  ask personas with [(xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color]]
 
 
+
+  ;if aforo-actual > 6 and ticks mod 5 = 0  [ask n-of random 6 personas with [ xcor < 29 ] [estornuda]]
+
+  ; Personas sin mascarilla, expulsan particulas por esturnudo cada 5 ticks y 50% probabilidad
+  ask personas with [xcor < 29 and mascarilla = false and tcarga-virica > 0] [if ticks mod 5 = 0 and 50 < random 100 [estornuda]]
 
   compute-forces
   apply-forces
@@ -138,7 +147,7 @@ to apply-forces
     let new-y ycor + step-y
     if esMuro = true [ ; Entra en contacto con el muro
       set pcarga-virica pcarga-virica + 1 ; Aumenta la carga virica
-      set pcolor red
+      ;set pcolor red
       die  ; La particula se adhiere a la superficie
     ]
     if new-x >= 29 or new-y >= max-pycor or new-x <= min-pxcor or new-y <= min-pycor [die]
@@ -279,11 +288,12 @@ to mirar-objetos-cercanos
   let x 0
   let y 0
   let h heading
-  let contagio 0
+  let muro-infectado false
   ask patch-here [
-    ask neighbors4 with [pcolor = blue or pcolor = red][
+    ask neighbors4 with [esMuro = true][
       set x pxcor
       set y pycor
+      set muro-infectado pcarga-virica > 0
     ]
   ]
   if x != 0 and random 100 > 90 [
@@ -303,14 +313,20 @@ to mirar-objetos-cercanos
 
     set size 1.5
     set lista-de-la-compra lista-de-la-compra - 1
-    ask patch x y [if pcolor = red [set contagio 1] set pcolor pcolor + 1] ; Resaltar en celeste el objeto seleccionado
-    if guantes = false and contagio = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color]
+
+
+    ; Contagiar/se objeto en estanteria al tocarlo sin guantes
+    if tcarga-virica > random 20 and guantes = false  [ask patch x y [set pcarga-virica pcarga-virica + 1]]
+    if guantes = false and muro-infectado [set tcarga-virica tcarga-virica + 1 cambiar-label-color]
+
     set size 1
     set heading h
 
 
   ]
 end
+
+
 
 to salir
   ifelse estado = 3 [
@@ -526,7 +542,7 @@ SLIDER
 %_de_guantes
 0
 100
-100.0
+80.0
 1
 1
 NIL
@@ -573,7 +589,7 @@ num-particles
 num-particles
 1
 20
-3.0
+2.0
 1
 1
 NIL
@@ -588,11 +604,48 @@ SLIDER
 %contagio_inicial
 1
 100
-1.0
+10.0
 1
 1
 NIL
 HORIZONTAL
+
+SLIDER
+6
+283
+182
+316
+prob_contagio_mascarilla
+prob_contagio_mascarilla
+0
+100
+10.0
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+199
+604
+286
+661
+Infectados
+count personas with[tcarga-virica > 0]
+17
+1
+14
+
+MONITOR
+292
+604
+400
+661
+% Infectados
+count personas with [tcarga-virica > 0] / población * 100
+2
+1
+14
 
 @#$#@#$#@
 ## WHAT IS IT?
