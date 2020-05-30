@@ -25,6 +25,7 @@ turtles-own[
   guantes
   mascarilla
   movimiento
+  ha-estornudado
 ]
 
 breed [particulas particula]
@@ -74,6 +75,7 @@ to setup
     set guantes false
     set mascarilla false
     set label tcarga-virica
+    set ha-estornudado 0
   ]
 
   set aforo-actual 0
@@ -97,7 +99,10 @@ end
 ; go
 
 to go
-  if ticks = 100000 [ stop ]
+  if ticks = 150000 [ stop ]
+
+  ; suponemos que un dia dura 1440 tiks
+
 
   ask personas with [tcarga-virica > 0 and color != 16 ] [cambiar-label-color] ; colorear a los enfermos
 
@@ -118,7 +123,7 @@ to go
   ;ask dependientes [estornuda]
 
   ; Contagio por contacto con particula en aire. 100% si no lleva mascarilla, proba_contagio_mascarilla% si lleva.
-  ask personas with [(xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color]]
+  ask personas with [((xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)) and ha-estornudado = 0 and random 101 < %_de_contagio] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color]]
 
 
 
@@ -130,6 +135,7 @@ to go
   compute-forces
   apply-forces
   movimiento-agente
+  ask personas with [ha-estornudado > 0][set ha-estornudado ha-estornudado - 1]
   tick
 
 end
@@ -172,24 +178,24 @@ end
 
 to estornuda
   if tcarga-virica > 0 [ ; Solucion de mierda
-  let direccion heading
-  hatch-particulas num-particles [
-    ;show direccion
-    let acel-x 20
-    let acel-y 30
-    if direccion = 0 [set vel-x random 10  set vel-y 1 * acel-y]
-    if direccion = 90 [set vel-x 1 * acel-x  set vel-y random 10]
-    if direccion = 270 [set vel-x random 20 - 10 set vel-y -1 * acel-y]
-    if direccion = -90 [set vel-x -1 * acel-x set vel-y random 20 - 10]
+    set ha-estornudado 10
+    let direccion heading
+    hatch-particulas num-particles [
+      ;show direccion
+      let acel-x 20
+      let acel-y 30
+      if direccion = 0 [set vel-x random 15 - 7  set vel-y (random-float 1) * acel-y]
+      if direccion = 90 [set vel-x (random-float 1) * acel-x  set vel-y random 15 - 7]
+      if direccion = 270 [set vel-x random 15 - 7 set vel-y (random-float 1 - 1) * acel-y]
+      if direccion = -90 [set vel-x (random-float 1 - 1) * acel-x set vel-y random 15 - 7]
 
-    ;set vel-y 10 - (random-float 20) ; velocidad y inicial
-    set vida 0
-    set color random 255
-    set shape "circle"
-    set size random-float 0.3
-    set color red
-    set label ""
-  ]
+      ;set vel-y 10 - (random-float 20) ; velocidad y inicial
+      set vida 0
+      set shape "circle"
+      set size random-float 0.3
+      set color red
+      set label ""
+    ]
   ]
 end
 
@@ -459,10 +465,10 @@ NIL
 1
 
 SLIDER
-2
-456
-174
-489
+10
+447
+182
+480
 wind
 wind
 0
@@ -474,30 +480,30 @@ NIL
 HORIZONTAL
 
 SLIDER
-2
-494
-174
-527
+7
+307
+179
+340
 maxTiempo
 maxTiempo
-0
-100
-30.0
-10
+5
+15
+15.0
+1
 1
 NIL
 HORIZONTAL
 
 SLIDER
 5
-166
+133
 177
-199
+166
 Aforo
 Aforo
-10
+0
 50
-10.0
+8.0
 1
 1
 NIL
@@ -519,15 +525,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-7
-394
-179
-427
+10
+396
+182
+429
 %_de_contagio
 %_de_contagio
 0
 100
-10.0
+60.0
 1
 1
 NIL
@@ -535,14 +541,14 @@ HORIZONTAL
 
 SLIDER
 7
+173
+179
 206
-179
-239
 %_de_guantes
 %_de_guantes
 0
 100
-80.0
+26.0
 1
 1
 NIL
@@ -550,14 +556,14 @@ HORIZONTAL
 
 SLIDER
 7
-243
+210
 179
-276
+243
 %_de_mascarillas
 %_de_mascarillas
 0
 100
-100.0
+20.0
 1
 1
 NIL
@@ -581,15 +587,15 @@ NIL
 1
 
 SLIDER
-6
-129
-178
-162
+8
+355
+180
+388
 num-particles
 num-particles
-1
+10
 20
-2.0
+10.0
 1
 1
 NIL
@@ -604,7 +610,7 @@ SLIDER
 %contagio_inicial
 1
 100
-10.0
+30.0
 1
 1
 NIL
@@ -612,9 +618,9 @@ HORIZONTAL
 
 SLIDER
 6
-283
+250
 182
-316
+283
 prob_contagio_mascarilla
 prob_contagio_mascarilla
 0
