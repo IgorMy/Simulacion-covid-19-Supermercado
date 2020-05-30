@@ -9,6 +9,10 @@ particulas-own[
 globals[
   step-size
   aforo-actual
+  infectados-hoy
+  muertos-hoy
+  curados-hoy
+  UCI-hoy
 ]
 
 patches-own[
@@ -47,7 +51,7 @@ to setup
 
   ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
   ask patches [if pxcor >= 1 and pycor >= 1 and pxcor <= 28 and pycor <= max-pycor - 1 [set pcolor 9] ] ; suelo
-  ask patches [if pxcor >= 30 and pycor >= 0 and pxcor <= max-pxcor and pycor <= 9 [set pcolor green] ] ; suelo para la población
+  ask patches [if pxcor >= 30 and pycor >= 0 and pxcor <= max-pxcor and pycor <= 9 [set pcolor 116] ] ; suelo para la población
   ask patches [if pxcor >= 30 and pycor >= 10 and pxcor <= max-pxcor and pycor <= 15 [set pcolor 45] ] ; UCI
   ask patches [if pxcor >= 30 and pycor >= 16 and pxcor <= max-pxcor and pycor <= 20 [set pcolor 3] ] ; cementerio
 
@@ -75,7 +79,7 @@ to setup
     set heading -90
     set color 87
     set label-color black
-    move-to one-of patches with [pcolor = green]
+    move-to one-of patches with [pcolor = 116]
     set guantes false
     set mascarilla false
     set label tcarga-virica
@@ -110,10 +114,19 @@ end
 to go
   if ticks = 150000 [ stop ]
 
+
+  ; HACER DIARIAMENTE
   ; suponemos que un dia dura 300 tiks y el super funciona durante 24h y hay unos aspersores que echan desinfectante
   if ticks mod 300 = 0 [
     ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0]
     ask particulas [die]
+
+  ; Reiniciamos los casos diarios
+  set infectados-hoy 0
+  set curados-hoy 0
+  set UCI-hoy 0
+  set muertos-hoy 0
+
     pasa-un-dia
   ]
 
@@ -149,6 +162,9 @@ to go
   apply-forces
   movimiento-agente
   ask personas with [ha-estornudado > 0][set ha-estornudado ha-estornudado - 1]
+
+  dibujar-graficas
+
   tick
 
 end
@@ -429,7 +445,7 @@ to salir-3
   fd ycor
   set posicion-objetivo 0
   set estado 0
-  move-to one-of patches with [pcolor = green]
+  move-to one-of patches with [pcolor = 116]
   set aforo-actual aforo-actual - 1
 end
 ;---------------------------------------------------------------------------------------------------
@@ -485,7 +501,7 @@ to Muere
 end
 
 to Sana
-  move-to one-of patches with [pcolor = green]
+  move-to one-of patches with [pcolor = 116]
   set tcarga-virica 0
   cambiar-label-color
   set curado true
@@ -493,6 +509,11 @@ to Sana
   if UCI = true [
     set UCI false
   ]
+end
+
+to dibujar-graficas
+  ask turtles [set-current-plot "Gráfica diaria" set-current-plot-pen "Infectados" plot distancexy 0 count personas with [tcarga-virica > 0] ]
+
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -578,7 +599,7 @@ Aforo
 Aforo
 0
 50
-8.0
+20.0
 1
 1
 NIL
@@ -608,7 +629,7 @@ SLIDER
 %_de_contagio
 0
 100
-60.0
+15.0
 1
 1
 NIL
@@ -623,7 +644,7 @@ SLIDER
 %_de_guantes
 0
 100
-26.0
+90.0
 1
 1
 NIL
@@ -638,7 +659,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-20.0
+85.0
 1
 1
 NIL
@@ -685,7 +706,7 @@ SLIDER
 %contagio_inicial
 1
 100
-30.0
+5.0
 1
 1
 NIL
@@ -700,7 +721,7 @@ prob_contagio_mascarilla
 prob_contagio_mascarilla
 0
 100
-10.0
+20.0
 1
 1
 NIL
@@ -718,10 +739,10 @@ count personas with[tcarga-virica > 0]
 14
 
 MONITOR
-292
-604
-400
-661
+198
+665
+284
+722
 % Infectados
 count personas with [tcarga-virica > 0] / población * 100
 2
@@ -742,6 +763,123 @@ Camillas-UCI
 1
 NIL
 HORIZONTAL
+
+MONITOR
+289
+604
+346
+661
+UCI
+count turtles with [UCI = true]
+0
+1
+14
+
+MONITOR
+351
+603
+429
+660
+Fallecidos
+count personas with [muerto = true]
+1
+1
+14
+
+MONITOR
+434
+604
+506
+661
+Curados
+count personas with [curado = true]
+1
+1
+14
+
+MONITOR
+289
+665
+348
+722
+% UCI
+count personas with [UCI = true] / población * 100
+2
+1
+14
+
+MONITOR
+354
+666
+430
+723
+% Fallecidos
+count personas with [muerto = true] / población * 100
+2
+1
+14
+
+MONITOR
+434
+666
+508
+723
+% Curados
+count personas with [curado = true] / población * 100
+2
+1
+14
+
+PLOT
+519
+602
+1001
+847
+Gráfica acumulada
+Ticks
+Personas
+0.0
+9000.0
+0.0
+500.0
+true
+true
+"" ""
+PENS
+"Infectados" 1.0 0 -2674135 true "" "plot count personas with [tcarga-virica > 0 and UCI != true]"
+"Curados" 1.0 0 -13840069 true "" "plot count personas with [curado = true]"
+"UCI" 1.0 0 -1184463 true "" "plot count personas with [UCI = true]"
+"Fallecidos" 1.0 0 -16777216 true "" "plot count personas with [muerto = true]"
+
+MONITOR
+349
+729
+510
+786
+% Fallecidos / Afectados
+count personas with [muerto = true] / count personas with [tcarga-virica > 0 or UCI = true or curado = true]
+2
+1
+14
+
+PLOT
+1044
+630
+1244
+780
+Gráfica diaria
+Ticks
+Personas
+0.0
+300.0
+0.0
+500.0
+true
+true
+"" ""
+PENS
+"Infectados" 1.0 1 -2674135 true "" ""
+"Curados" 1.0 1 -13840069 true "" ""
 
 @#$#@#$#@
 ## WHAT IS IT?
