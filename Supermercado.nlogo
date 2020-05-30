@@ -101,8 +101,8 @@ end
 to go
   if ticks = 150000 [ stop ]
 
-  ; suponemos que un dia dura 1440 tiks
-
+  ; suponemos que un dia dura 300 tiks y el super funciona durante 24h y hay unos aspersores que echan desinfectante
+  if ticks mod 300 = 0 [ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0] ask particulas [die]]
 
   ask personas with [tcarga-virica > 0 and color != 16 ] [cambiar-label-color] ; colorear a los enfermos
 
