@@ -14,7 +14,6 @@ globals[
 patches-own[
   esMuro
   pcarga-virica
-
 ]
 
 turtles-own[
@@ -26,6 +25,11 @@ turtles-own[
   mascarilla
   movimiento
   ha-estornudado
+  edad
+  muerto
+  UCI
+  curado
+  dias
 ]
 
 breed [particulas particula]
@@ -76,6 +80,11 @@ to setup
     set mascarilla false
     set label tcarga-virica
     set ha-estornudado 0
+    set edad 18 + random 61
+    set muerto false
+    set UCI false
+    set curado false
+    set dias 0
   ]
 
   set aforo-actual 0
@@ -102,9 +111,13 @@ to go
   if ticks = 150000 [ stop ]
 
   ; suponemos que un dia dura 300 tiks y el super funciona durante 24h y hay unos aspersores que echan desinfectante
-  if ticks mod 300 = 0 [ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0] ask particulas [die]]
+  if ticks mod 300 = 0 [
+    ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0]
+    ask particulas [die]
+    pasa-un-dia
+  ]
 
-  ask personas with [tcarga-virica > 0 and color != 16 ] [cambiar-label-color] ; colorear a los enfermos
+  ask personas with [tcarga-virica > 0 and color != 16 ] [cambiar-label-color] ; colorear a  los enfermos
 
   ; Colorear muros segun carga virica
   ask patches with [esMuro = true and member? pcarga-virica (range 1 5)] [set pcolor 19]
@@ -117,13 +130,13 @@ to go
   if ticks mod 2 = 0 [ask patches with [pcolor = blue + 1] [set pcolor blue]] ; Reestablecer color de los objetos seleccionados
 
   if aforo-actual < aforo and random 100 > 50 [
-    ask one-of personas with [ xcor > 29 ][set lista-de-la-compra 3 + random 13]
+    ask one-of personas with [ xcor > 29 and not UCI and not muerto ][set lista-de-la-compra 3 + random 13]
     set aforo-actual aforo-actual + 1
   ]
   ;ask dependientes [estornuda]
 
   ; Contagio por contacto con particula en aire. 100% si no lleva mascarilla, proba_contagio_mascarilla% si lleva.
-  ask personas with [((xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)) and ha-estornudado = 0 and random 101 < %_de_contagio] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color]]
+  ask personas with [((xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)) and ha-estornudado = 0 and random 101 < %_de_contagio and not curado] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color]]
 
 
 
@@ -215,7 +228,7 @@ end
 ; movimiento de los agentes
 
 to movimiento-agente
-  ask personas with [lista-de-la-compra > 0 or (lista-de-la-compra = 0 and xcor < 29)] [
+  ask personas with [(lista-de-la-compra > 0 or (lista-de-la-compra = 0 and xcor < 29 )) and not muerto and not UCI] [
     ifelse estado = 0 [
       colocar-en-la-tienda
     ][
@@ -322,8 +335,8 @@ to mirar-objetos-cercanos
 
 
     ; Contagiar/se objeto en estanteria al tocarlo sin guantes
-    if tcarga-virica > random 20 and guantes = false  [ask patch x y [set pcarga-virica pcarga-virica + 1]]
-    if guantes = false and muro-infectado [set tcarga-virica tcarga-virica + 1 cambiar-label-color]
+    if tcarga-virica > random 20 and guantes = false and not curado [ask patch x y [set pcarga-virica pcarga-virica + 1]]
+    if guantes = false and muro-infectado and not curado [set tcarga-virica tcarga-virica + 1 cambiar-label-color]
 
     set size 1
     set heading h
@@ -419,6 +432,68 @@ to salir-3
   move-to one-of patches with [pcolor = green]
   set aforo-actual aforo-actual - 1
 end
+;---------------------------------------------------------------------------------------------------
+to pasa-un-dia
+  ask personas with [tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
+    set dias dias + 1
+
+    ; Muerte o Curado ;
+    if dias = 15 [
+      ifelse (edad >= 80 and 22 > random 100) or
+      (edad >= 70 and edad < 80 and 14 > random 100) or
+      (edad > 60 and edad <= 70 and 5 > random 100) or
+      (edad > 50 and edad <= 60 and 1.5 > random 100) or
+      (edad <= 50 and 0.5 > random 100) [Muere] [Sana]
+    ]
+
+    ; UCI ;
+    if dias = 7 and not UCI [
+      if ((edad > 80 and 5 > random 100) or
+      (edad > 60 and edad <= 80 and 30 > random 100) or
+      (edad > 50 and edad <= 60 and 20 > random 100) or
+      (edad > 40 and edad <= 50 and 10 > random 100) or
+      (edad <= 40 and 5 > random 100) ) and not UCI [ Ingresa ]
+    ]
+
+  ]
+end
+
+to Ingresa
+  if count turtles with [UCI = true] < Camillas-UCI [
+    move-to one-of patches with [pcolor = 45 and pxcor > 29]
+    set UCI true
+    set lista-de-la-compra 0
+    set color gray
+    set label ""
+    set estado 0
+    set posicion-objetivo 0
+  ]
+end
+
+to Muere
+  move-to one-of patches with [pcolor = 3]
+  set muerto true
+  if UCI = true [
+    set UCI false
+  ]
+  set tcarga-virica 0
+  set lista-de-la-compra 0
+  set color black
+  set label ""
+  set estado 0
+  set posicion-objetivo 0
+end
+
+to Sana
+  move-to one-of patches with [pcolor = green]
+  set tcarga-virica 0
+  cambiar-label-color
+  set curado true
+  set color green
+  if UCI = true [
+    set UCI false
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 197
@@ -448,10 +523,10 @@ ticks
 30.0
 
 BUTTON
-8
-10
-71
-43
+25
+14
+88
+47
 NIL
 setup
 NIL
@@ -465,10 +540,10 @@ NIL
 1
 
 SLIDER
-10
-447
-182
-480
+12
+462
+184
+495
 wind
 wind
 0
@@ -480,10 +555,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-7
-307
-179
-340
+9
+322
+181
+355
 maxTiempo
 maxTiempo
 5
@@ -495,10 +570,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-5
-133
-177
-166
+7
+148
+179
+181
 Aforo
 Aforo
 0
@@ -510,10 +585,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-6
-51
-178
-84
+8
+66
+180
+99
 población
 población
 50
@@ -525,10 +600,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-10
-396
-182
-429
+12
+411
+184
+444
 %_de_contagio
 %_de_contagio
 0
@@ -540,10 +615,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-7
-173
-179
-206
+9
+188
+181
+221
 %_de_guantes
 %_de_guantes
 0
@@ -555,10 +630,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-7
-210
-179
-243
+9
+225
+181
+258
 %_de_mascarillas
 %_de_mascarillas
 0
@@ -570,10 +645,10 @@ NIL
 HORIZONTAL
 
 BUTTON
-80
-10
-143
-43
+97
+14
+160
+47
 NIL
 go\n
 T
@@ -587,10 +662,10 @@ NIL
 1
 
 SLIDER
-8
-355
-180
-388
+10
+370
+182
+403
 num-particles
 num-particles
 10
@@ -602,10 +677,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-6
-90
-178
-123
+8
+105
+180
+138
 %contagio_inicial
 %contagio_inicial
 1
@@ -617,10 +692,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-6
-250
-182
-283
+8
+265
+184
+298
 prob_contagio_mascarilla
 prob_contagio_mascarilla
 0
@@ -652,6 +727,21 @@ count personas with [tcarga-virica > 0] / población * 100
 2
 1
 14
+
+SLIDER
+12
+503
+184
+536
+Camillas-UCI
+Camillas-UCI
+1
+50
+50.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
