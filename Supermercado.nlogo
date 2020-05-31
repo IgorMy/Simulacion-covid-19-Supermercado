@@ -1,3 +1,4 @@
+; Propiedades de las particulas
 particulas-own[
   vel-x ; Velocidad eje X
   vel-y ; Velocidad eje Y
@@ -6,6 +7,7 @@ particulas-own[
   vida
 ]
 
+; variables globales
 globals[
   step-size
   aforo-actual
@@ -17,28 +19,36 @@ globals[
   ticks-dia
 ]
 
+; propiedades de los muros
 patches-own[
   esMuro
   pcarga-virica
 ]
 
+; propiedades de las tortugas
 turtles-own[
   tcarga-virica
-  lista-de-la-compra
-  estado
-  posicion-objetivo
+  UCI
+  curado
+  muerto
+  dias
+  infectado
+  edad
+  genero
+]
+
+; propiedades de las personas
+personas-own[
   guantes
   mascarilla
   movimiento
   ha-estornudado
-  edad
-  infectado
-  muerto
-  UCI
-  curado
-  dias
+  posicion-objetivo
+  estado
+  lista-de-la-compra
 ]
 
+; las diferentes razas
 breed [particulas particula]
 breed [personas persona]
 breed [dependientes dependiente]
@@ -47,13 +57,17 @@ breed [dependientes dependiente]
 ; setup
 
 to setup
+
+  ; Configuraciones basicas del mundo
   ca ; Limpiar la pantalla
   reset-ticks ; se ponen los tick a 0
   set ticks-dia 300 ; Duracion de un dia en ticks
   set dia 1 ; Contador dias
   set step-size 0.07 ; movimiento de las particulas
-  ; dibujado de paredes
+  set aforo-actual 0
 
+
+  ; dibujado de paredes
   ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
   ask patches [if pxcor >= 1 and pycor >= 1 and pxcor <= 28 and pycor <= max-pycor - 1 [set pcolor 9] ] ; suelo
   ask patches [if pxcor >= 30 and pycor >= 0 and pxcor <= max-pxcor and pycor <= 9 [set pcolor 116] ] ; suelo para la población
@@ -67,18 +81,16 @@ to setup
   ask patches with [pycor = 19 and (member? pxcor [3  4 5  8 9 10 11 12 13 14 15 16 17 20 21 22 23 24 25 26])] [set pcolor blue]; pared superior
   ask patches with [pxcor = 28 and pycor > 7 and pycor < 19] [set pcolor blue]; pared derecha
 
+  ;Se asignan la propiedad de muro a las estanterias y su carga virica
   ask patches with [pcolor = blue] [set esMuro true] ; Asignar muros
-
   ask patches [set pcarga-virica 0] ; Inicializamos la carga virica de los muros
 
-
-
+  ; Dependientes y su espacio de trabajo
   ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
-
   crt 5 [set breed dependientes set shape "person" set ycor 4 set color green set xcor 7 + who * 4]
 
-  crt población [
-    set breed personas
+  ; Generación de personas
+  create-personas población [
     set movimiento 1
     set estado 0
     set heading -90
@@ -95,16 +107,20 @@ to setup
     set UCI false
     set curado false
     set dias 0
+    ifelse random 2 = 0 [set genero "M"][set genero "F"]
   ]
 
-  set aforo-actual 0
-
-  ask n-of floor(población * %contagio_inicial / 100) personas with [color != 16 ][set tcarga-virica 1 cambiar-label-color]
+  ; Se establecen los enfermos y se reparten tanto los guantes como las mascarillas
+  ask n-of floor(población * %contagio_inicial / 100) personas with [color != 16 ][set tcarga-virica 10 cambiar-label-color]
   ask n-of floor(población * %_de_guantes / 100) personas with [guantes = false ][set guantes true cambiar-label-color]
   ask n-of floor(población * %_de_mascarillas / 100) personas with [mascarilla = false ][set mascarilla true cambiar-label-color]
 
 end
 
+; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; funciones extra
+
+; cambiar label de las personas
 to cambiar-label-color
   ifelse tcarga-virica > 0 [set color 16][set color 87]
   let l ""
@@ -115,18 +131,23 @@ to cambiar-label-color
 end
 
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
-; go
+; metodo go
 
 to go
-  if ticks = 150000 [ stop ]
 
+  ; parar la simulación al final del dia 60
+  if ticks = ticks-dia * 60 [ stop ]
 
   ; HACER DIARIAMENTE
-  ; suponemos que un dia dura 300 tiks y el super funciona durante 24h y hay unos aspersores que echan desinfectante
   if ticks mod ticks-dia = 0 [
-    ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0] ; Se desinfecta el supermercado
+    ; Se desinfecta el supermercado
+    ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0]
     ask particulas [die]
+
+    ; comprobación de los infectados
     pasa-un-dia
+
+    ; dibujo de graficas
     dibujar-graficas
 
     ; Reiniciamos los casos diarios
@@ -136,6 +157,7 @@ to go
     set UCI-hoy 0
   ]
 
+  ; Comprobación extra por si acaso no se ha coloreado algun enfermo
   ask personas with [tcarga-virica > 0 and color != 16 ] [cambiar-label-color] ; colorear a  los enfermos
 
   ; Colorear muros segun carga virica
@@ -146,31 +168,54 @@ to go
   ask patches with [esMuro = true and member? pcarga-virica (range 21 25)] [set pcolor 15]
   ask patches with [esMuro = true and pcarga-virica > 25] [set pcolor 14]
 
-  if ticks mod 2 = 0 [ask patches with [pcolor = blue + 1] [set pcolor blue]] ; Reestablecer color de los objetos seleccionados
+  ; Reestablecer color de los objetos coloreados
+  if ticks mod 2 = 0 [ask patches with [pcolor = blue + 1] [set pcolor blue]]
 
+  ; metemos a la gente dentro de la tienda
   if aforo-actual < aforo and random 100 > 50 [
-    ask one-of personas with [ xcor > 29 and not UCI and not muerto ][set lista-de-la-compra 3 + random 13]
+    ask one-of personas with [ xcor > 29 and not UCI and not muerto ][set lista-de-la-compra 3 + random (numero-productos - 2)]
     set aforo-actual aforo-actual + 1
   ]
-  ;ask dependientes [estornuda]
 
   ; Contagio por contacto con particula en aire. 100% si no lleva mascarilla, proba_contagio_mascarilla% si lleva. Marcar a infectado si no lo está
-  ask personas with [((xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)) and ha-estornudado = 0 and random 101 < %_de_contagio and not curado] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color if infectado = false [set infectado true set infectados-hoy infectados-hoy + 1  output-show "se infecta con partícula en el aire"]]]
+  ask personas with [
+    ((xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)) and ha-estornudado = 0 and random 101 < %_de_contagio and not curado
+  ] [
 
+    let hay-particula 0
+    let probabilidad-genero 0
+    ifelse genero = "M" [set probabilidad-genero random 100][set probabilidad-genero random 130]
+    if probabilidad-genero > 30 [ ; menor probabilidad de contagio en hombres
+      ask particulas in-cone 1 180 [
+        set hay-particula 1 die
+      ]
 
-
-  ;if aforo-actual > 6 and ticks mod 5 = 0  [ask n-of random 6 personas with [ xcor < 29 ] [estornuda]]
+      if hay-particula = 1 [
+        set tcarga-virica tcarga-virica + 1
+        cambiar-label-color
+        if infectado = false [
+          set infectado true set infectados-hoy infectados-hoy + 1
+          output-show "se infecta con partícula en el aire"
+        ]
+      ]
+    ]
+  ]
 
   ; Personas sin mascarilla, expulsan particulas por esturnudo cada 5 ticks y 50% probabilidad
-  ask personas with [xcor < 29 and mascarilla = false and tcarga-virica > 0] [if ticks mod 5 = 0 and 50 < random 100 [estornuda]]
+  let personas-dentro count personas with [xcor < 29 and mascarilla = false and tcarga-virica > 0]
+  ask n-of (random personas-dentro) personas with [xcor < 29 and mascarilla = false and tcarga-virica > 0] [if ticks mod 5 = 0 and 50 < random 100 [estornuda]]
 
+  ; Movimiento de particulas
   compute-forces
   apply-forces
+
+  ; Movimiento del agente
   movimiento-agente
+
+  ; reducción del tiempo de contaminación tras un estornudo
   ask personas with [ha-estornudado > 0][set ha-estornudado ha-estornudado - 1]
 
   tick
-
 end
 
 to apply-gravity
@@ -181,7 +226,9 @@ to apply-forces
  ask particulas[
     let step-x vel-x * step-size * 0.1
     let step-y (vel-y - wind) * step-size * 0.1
-    if vida = maxTiempo [die]
+    let extra 1
+    if ancho-pasillo = 2 [set extra extra + random-float 0.2]
+    if vida = floor(maxTiempo * extra) [die]
     let new-x xcor + step-x
     let new-y ycor + step-y
     if esMuro = true [ ; Entra en contacto con el muro
@@ -202,9 +249,6 @@ to compute-forces
     set force-y 0
     apply-gravity
     set vida vida + 1
-    ; CONTAGIO CONTACTO PERSONAS-PARTICULAS
-    ;if vida >= 3 [ask personas in-cone 1 180 [set tcarga-virica tcarga-virica + 1 set label tcarga-virica set control 1]]
-    ;if control = 1 [die]
   ]
 
 end
@@ -213,7 +257,7 @@ to estornuda
   if tcarga-virica > 0 [ ; Solucion de mierda
     set ha-estornudado 10
     let direccion heading
-    hatch-particulas num-particles [
+    hatch-particulas num-particles * tcarga-virica / 10 [
       ;show direccion
       let acel-x 20
       let acel-y 30
@@ -459,24 +503,47 @@ to pasa-un-dia
   ask personas with [tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
     set dias dias + 1
 
-    ; Muerte o Curado ;
-    if dias = 15 [
-      ifelse (edad >= 80 and 22 > random 100) or
-      (edad >= 70 and edad < 80 and 14 > random 100) or
-      (edad > 60 and edad <= 70 and 5 > random 100) or
-      (edad > 50 and edad <= 60 and 1.5 > random 100) or
-      (edad <= 50 and 0.5 > random 100) [Muere] [Sana]
-    ]
+    ifelse genero = "M" [
 
-    ; UCI ;
-    if dias = 7 and not UCI [
-      if ((edad > 80 and 5 > random 100) or
-      (edad > 60 and edad <= 80 and 30 > random 100) or
-      (edad > 50 and edad <= 60 and 20 > random 100) or
-      (edad > 40 and edad <= 50 and 10 > random 100) or
-      (edad <= 40 and 5 > random 100) ) and not UCI [ Ingresa ]
-    ]
+      ; Muerte o Curado ;
+      if dias = 15 [
+        ifelse (edad >= 80 and (22 > random 161 or (not UCI and 70 > random 100))) or
+        (edad >= 70 and edad < 80 and (14 > random 161 or (not UCI and 60 > random 100))) or
+        (edad > 60 and edad <= 70 and 5 > random 161) or
+        (edad > 50 and edad <= 60 and 1.5 > random 161) or
+        (edad <= 50 and 0.5 > random 161) [Muere] [Sana]
+      ]
 
+      ; UCI ;
+      if dias = 7 and not UCI [
+        if ((edad > 80 and 5 > random 172) or
+          (edad > 60 and edad <= 80 and 30 > random 172) or
+          (edad > 50 and edad <= 60 and 20 > random 172) or
+          (edad > 40 and edad <= 50 and 10 > random 172) or
+          (edad <= 40 and 5 > random 172) ) and not UCI [ Ingresa ]
+      ]
+
+    ][
+
+      ; Muerte o Curado ;
+      if dias = 15 [
+        ifelse (edad >= 80 and (22 > random 139 or (not UCI and 70 > random 100))) or
+        (edad >= 70 and edad < 80 and (14 > random 139  or (not UCI and 60 > random 100))) or
+        (edad > 60 and edad <= 70 and 5 > random 139) or
+        (edad > 50 and edad <= 60 and 1.5 > random 139) or
+        (edad <= 50 and 0.5 > random 139) [Muere] [Sana]
+      ]
+
+      ; UCI ;
+      if dias = 7 and not UCI [
+        if ((edad > 80 and 5 > random 128) or
+          (edad > 60 and edad <= 80 and 30 > random 128) or
+          (edad > 50 and edad <= 60 and 20 > random 128) or
+          (edad > 40 and edad <= 50 and 10 > random 128) or
+          (edad <= 40 and 5 > random 128) ) and not UCI [ Ingresa ]
+      ]
+
+    ]
   ]
 
     output-show (word "INFECTADOS HOY: " infectados-hoy)
@@ -597,7 +664,7 @@ wind
 wind
 0
 1
-1.0
+0.9
 0.1
 1
 NIL
@@ -612,7 +679,7 @@ maxTiempo
 maxTiempo
 5
 15
-15.0
+10.0
 1
 1
 NIL
@@ -627,7 +694,7 @@ Aforo
 Aforo
 0
 50
-30.0
+34.0
 1
 1
 NIL
@@ -672,7 +739,7 @@ SLIDER
 %_de_guantes
 0
 100
-91.0
+41.0
 1
 1
 NIL
@@ -687,7 +754,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-91.0
+59.0
 1
 1
 NIL
@@ -717,9 +784,9 @@ SLIDER
 393
 num-particles
 num-particles
+5
 10
-20
-20.0
+7.0
 1
 1
 NIL
@@ -734,7 +801,7 @@ SLIDER
 %contagio_inicial
 1
 100
-5.0
+15.0
 1
 1
 NIL
@@ -749,7 +816,7 @@ prob_contagio_mascarilla
 prob_contagio_mascarilla
 0
 100
-61.0
+42.0
 1
 1
 NIL
@@ -786,7 +853,7 @@ Camillas-UCI
 Camillas-UCI
 1
 50
-31.0
+29.0
 1
 1
 NIL
@@ -940,6 +1007,36 @@ OUTPUT
 1775
 599
 11
+
+SLIDER
+13
+535
+185
+568
+ancho-pasillo
+ancho-pasillo
+1
+2
+2.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+573
+187
+606
+numero-productos
+numero-productos
+3
+15
+9.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
