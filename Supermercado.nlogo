@@ -12,7 +12,6 @@ globals[
   infectados-hoy
   muertos-hoy
   curados-hoy
-  UCI-hoy
 ]
 
 patches-own[
@@ -120,14 +119,13 @@ to go
   if ticks mod 300 = 0 [
     ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0]
     ask particulas [die]
-
-  ; Reiniciamos los casos diarios
-  set infectados-hoy 0
-  set curados-hoy 0
-  set UCI-hoy 0
-  set muertos-hoy 0
-
     pasa-un-dia
+    dibujar-graficas
+
+    ; Reiniciamos los casos diarios
+    set infectados-hoy count personas with [tcarga-virica > 0]
+    set curados-hoy count personas with [curado = true]
+    set muertos-hoy count personas with [muerto = true]
   ]
 
   ask personas with [tcarga-virica > 0 and color != 16 ] [cambiar-label-color] ; colorear a  los enfermos
@@ -162,8 +160,6 @@ to go
   apply-forces
   movimiento-agente
   ask personas with [ha-estornudado > 0][set ha-estornudado ha-estornudado - 1]
-
-  dibujar-graficas
 
   tick
 
@@ -512,7 +508,11 @@ to Sana
 end
 
 to dibujar-graficas
-  ask turtles [set-current-plot "Gráfica diaria" set-current-plot-pen "Infectados" plot distancexy 0 count personas with [tcarga-virica > 0] ]
+  ask one-of turtles [
+    set-current-plot "Gráfica diaria"
+    set-current-plot-pen "Infectados"
+    let infectados count personas with [tcarga-virica > 0] - infectados-hoy
+    plot distancexy 0 infectados ]
 
 end
 @#$#@#$#@
@@ -541,7 +541,7 @@ GRAPHICS-WINDOW
 0
 1
 ticks
-30.0
+800.0
 
 BUTTON
 25
@@ -561,10 +561,10 @@ NIL
 1
 
 SLIDER
-12
-462
-184
-495
+13
+452
+185
+485
 wind
 wind
 0
@@ -576,10 +576,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-322
-181
-355
+10
+312
+182
+345
 maxTiempo
 maxTiempo
 5
@@ -599,7 +599,7 @@ Aforo
 Aforo
 0
 50
-20.0
+15.0
 1
 1
 NIL
@@ -621,15 +621,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-12
-411
-184
-444
+13
+401
+185
+434
 %_de_contagio
 %_de_contagio
 0
 100
-15.0
+40.0
 1
 1
 NIL
@@ -644,7 +644,7 @@ SLIDER
 %_de_guantes
 0
 100
-90.0
+30.0
 1
 1
 NIL
@@ -659,7 +659,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-85.0
+40.0
 1
 1
 NIL
@@ -683,15 +683,15 @@ NIL
 1
 
 SLIDER
-10
-370
-182
-403
+11
+360
+183
+393
 num-particles
 num-particles
 10
 20
-10.0
+15.0
 1
 1
 NIL
@@ -706,7 +706,7 @@ SLIDER
 %contagio_inicial
 1
 100
-5.0
+40.0
 1
 1
 NIL
@@ -750,15 +750,15 @@ count personas with [tcarga-virica > 0] / población * 100
 14
 
 SLIDER
-12
-503
-184
-536
+13
+493
+185
+526
 Camillas-UCI
 Camillas-UCI
 1
 50
-50.0
+20.0
 1
 1
 NIL
@@ -857,16 +857,16 @@ MONITOR
 510
 786
 % Fallecidos / Afectados
-count personas with [muerto = true] / count personas with [tcarga-virica > 0 or UCI = true or curado = true]
+count personas with [muerto = true] / count personas with [tcarga-virica > 0 or UCI = true or curado = true or muerto = true] * 100
 2
 1
 14
 
 PLOT
-1044
-630
-1244
-780
+1025
+624
+1416
+823
 Gráfica diaria
 Ticks
 Personas
@@ -879,7 +879,7 @@ true
 "" ""
 PENS
 "Infectados" 1.0 1 -2674135 true "" ""
-"Curados" 1.0 1 -13840069 true "" ""
+"Curados" 1.0 0 -13840069 true "" ""
 
 @#$#@#$#@
 ## WHAT IS IT?
