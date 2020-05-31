@@ -46,6 +46,7 @@ personas-own[
   posicion-objetivo
   estado
   lista-de-la-compra
+  espera
 ]
 
 ; las diferentes razas
@@ -173,7 +174,7 @@ to go
 
   ; metemos a la gente dentro de la tienda
   if aforo-actual < aforo and random 100 > 50 [
-    ask one-of personas with [ xcor > 29 and not UCI and not muerto ][set lista-de-la-compra 3 + random (numero-productos - 2)]
+    ask one-of personas with [ xcor > 29 and not UCI and not muerto ][set lista-de-la-compra 3 + random (numero-productos - 2) set espera lista-de-la-compra]
     set aforo-actual aforo-actual + 1
   ]
 
@@ -427,7 +428,15 @@ to salir
           ifelse estado = 7[
             salir-2
           ][
-            salir-3
+            ifelse estado = 8[
+              salir-3
+            ][
+              ifelse estado = 9[
+                esperar
+              ][
+                salir-espera
+              ]
+            ]
           ]
         ]
       ]
@@ -461,15 +470,31 @@ to ir-dependiente-2
 end
 
 to ir-dependiente-3
-  fd 1
-  if ycor = 4 [
-    set heading 90
-    set size 1.5
-    set size 1
+  let cola 0
+  ask patch xcor (ycor - 1) [set cola count turtles-here]
+  if cola = 0 [ ; cola de espera
+    fd 1
+    if ycor = 4 [
+      set heading 90
+      set size 1.5
+      set estado 9
+    ]
+  ]
+end
+
+to esperar
+  set espera espera - 3
+  if espera <= 0 [
+    set estado 10
+    set espera 0
+  ]
+end
+
+to salir-espera
+  set size 1
     set heading 180
     set estado 6
     set posicion-objetivo 1 + random 2
-  ]
 end
 
 to salir-1
