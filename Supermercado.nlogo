@@ -12,6 +12,7 @@ globals[
   infectados-hoy
   muertos-hoy
   curados-hoy
+  dia
 ]
 
 patches-own[
@@ -45,6 +46,7 @@ breed [dependientes dependiente]
 to setup
   ca ; Limpiar la pantalla
   reset-ticks ; se ponen los tick a 0
+  set dia 1 ; Contador dias
   set step-size 0.07 ; movimiento de las particulas
   ; dibujado de paredes
 
@@ -446,6 +448,7 @@ to salir-3
 end
 ;---------------------------------------------------------------------------------------------------
 to pasa-un-dia
+  set dia dia + 1
   ask personas with [tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
     set dias dias + 1
 
@@ -584,7 +587,7 @@ maxTiempo
 maxTiempo
 5
 15
-15.0
+10.0
 1
 1
 NIL
@@ -691,7 +694,7 @@ num-particles
 num-particles
 10
 20
-15.0
+20.0
 1
 1
 NIL
@@ -721,7 +724,7 @@ prob_contagio_mascarilla
 prob_contagio_mascarilla
 0
 100
-20.0
+61.0
 1
 1
 NIL
@@ -880,6 +883,17 @@ true
 PENS
 "Infectados" 1.0 1 -2674135 true "" ""
 "Curados" 1.0 0 -13840069 true "" ""
+
+MONITOR
+119
+641
+188
+686
+Día Actual
+dia
+0
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
