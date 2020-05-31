@@ -454,11 +454,7 @@ to salir-3
 end
 ;---------------------------------------------------------------------------------------------------
 to pasa-un-dia
-  output-show (word "INFECTADOS HOY: " infectados-hoy)
-  output-show (word "UCI HOY: " UCI-hoy)
-  output-show (word "FALLECIDOS HOY: " muertos-hoy)
-  output-show (word "CURADOS HOY: " curados-hoy)
-  output-show (word "- DIA " dia " -")
+
   set dia dia + 1
   ask personas with [tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
     set dias dias + 1
@@ -482,6 +478,12 @@ to pasa-un-dia
     ]
 
   ]
+
+    output-show (word "INFECTADOS HOY: " infectados-hoy)
+    output-show (word "UCI HOY: " UCI-hoy)
+    output-show (word "FALLECIDOS HOY: " muertos-hoy)
+    output-show (word "CURADOS HOY: " curados-hoy)
+    output-show (word "- DIA " dia " -")
 end
 
 to Ingresa
