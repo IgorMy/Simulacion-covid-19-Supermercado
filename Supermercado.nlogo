@@ -124,7 +124,7 @@ to go
   ; HACER DIARIAMENTE
   ; suponemos que un dia dura 300 tiks y el super funciona durante 24h y hay unos aspersores que echan desinfectante
   if ticks mod ticks-dia = 0 [
-    ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0]
+    ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0] ; Se desinfecta el supermercado
     ask particulas [die]
     pasa-un-dia
     dibujar-graficas
@@ -155,7 +155,7 @@ to go
   ;ask dependientes [estornuda]
 
   ; Contagio por contacto con particula en aire. 100% si no lleva mascarilla, proba_contagio_mascarilla% si lleva. Marcar a infectado si no lo está
-  ask personas with [((xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)) and ha-estornudado = 0 and random 101 < %_de_contagio and not curado] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color if infectado = false [set infectado true set infectados-hoy infectados-hoy + 1]]]
+  ask personas with [((xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)) and ha-estornudado = 0 and random 101 < %_de_contagio and not curado] [let hay-particula 0 ask particulas in-cone 1 180 [set hay-particula 1 die] if hay-particula = 1 [set tcarga-virica tcarga-virica + 1 cambiar-label-color if infectado = false [set infectado true set infectados-hoy infectados-hoy + 1  output-show "se infecta con partícula en el aire"]]]
 
 
 
@@ -355,8 +355,8 @@ to mirar-objetos-cercanos
 
 
     ; Contagiar/se objeto en estanteria al tocarlo sin guantes
-    if tcarga-virica > random 20 and guantes = false and not curado [ask patch x y [set pcarga-virica pcarga-virica + 1]]
-    if guantes = false and muro-infectado and not curado [set tcarga-virica tcarga-virica + 1 cambiar-label-color if infectado = false [set infectado true set infectados-hoy infectados-hoy + 1]]
+    if tcarga-virica > random 20 and guantes = false and not curado [ask patch x y [set pcarga-virica pcarga-virica + 1]  output-show (word "infecta el objeto " x "-" y)]
+    if guantes = false and muro-infectado and not curado [set tcarga-virica tcarga-virica + 1 cambiar-label-color if infectado = false [set infectado true set infectados-hoy infectados-hoy + 1 output-show (word "se infecta al tocar el objeto " x "-" y)]]
 
     set size 1
     set heading h
@@ -454,6 +454,11 @@ to salir-3
 end
 ;---------------------------------------------------------------------------------------------------
 to pasa-un-dia
+  output-show (word "INFECTADOS HOY: " infectados-hoy)
+  output-show (word "UCI HOY: " UCI-hoy)
+  output-show (word "FALLECIDOS HOY: " muertos-hoy)
+  output-show (word "CURADOS HOY: " curados-hoy)
+  output-show (word "- DIA " dia " -")
   set dia dia + 1
   ask personas with [tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
     set dias dias + 1
@@ -481,6 +486,7 @@ end
 
 to Ingresa
   if count turtles with [UCI = true] < Camillas-UCI [
+    output-show " INGRESA UCI"
     move-to one-of patches with [pcolor = orange and pxcor > 29]
     set UCI true
     set UCI-hoy UCI-hoy + 1 ; Aumentamos el contador diario
@@ -494,6 +500,7 @@ end
 
 to Muere
   move-to one-of patches with [pcolor = 3]
+  output-show " MUERE"
   set muerto true
   set muertos-hoy muertos-hoy + 1 ; Aumentamos el contador
   if UCI = true [
@@ -509,6 +516,7 @@ end
 
 to Sana
   move-to one-of patches with [pcolor = 116]
+  output-show " SE CURA"
   set tcarga-virica 0
   cambiar-label-color
   set curado true
@@ -923,6 +931,13 @@ count personas with[tcarga-virica > 0 or UCI or muerto or curado]
 0
 1
 14
+
+OUTPUT
+1311
+12
+1775
+599
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
