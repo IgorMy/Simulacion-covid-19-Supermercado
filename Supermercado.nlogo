@@ -195,7 +195,7 @@ to go
 
   ; Contagio por contacto con particula en aire. 100% si no lleva mascarilla, proba_contagio_mascarilla% si lleva. Marcar a infectado si no lo está
   ask personas with [
-    ((xcor < 29 and mascarilla = false) or (xcor < 29 and mascarilla = true and prob_contagio_mascarilla < random 100)) and ha-estornudado = 0 and random 101 < %_de_contagio and not curado
+    (xcor < 29 and (mascarilla = false or ( mascarilla = true and prob_contagio_mascarilla < random 100))) and ha-estornudado = 0 and random 101 < %_de_contagio and not curado
   ] [
 
     let hay-particula 0
@@ -790,7 +790,7 @@ SLIDER
 %_de_guantes
 0
 100
-91.0
+61.0
 1
 1
 NIL
@@ -805,7 +805,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-95.0
+61.0
 1
 1
 NIL
@@ -852,7 +852,7 @@ SLIDER
 %contagio_inicial
 1
 100
-5.0
+20.0
 1
 1
 NIL
@@ -1090,15 +1090,26 @@ NIL
 HORIZONTAL
 
 MONITOR
-63
-611
-195
-660
+60
+610
+192
+659
 Afectados actuales
 count personas with [tcarga-virica > 0]
 2
 1
 12
+
+MONITOR
+130
+665
+187
+718
+dias
+ticks / 300
+0
+1
+13
 
 @#$#@#$#@
 ## WHAT IS IT?
