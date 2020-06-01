@@ -483,7 +483,7 @@ end
 
 to ir-dependiente-3
   let cola 0
-  ask patch xcor (ycor - 1) [set cola count turtles-here]
+  ask patch xcor (ycor - 1) [set cola count turtles-here with [breed != particulas] ]
   if cola = 0 [ ; cola de espera
     fd 1
     if ycor = 4 [
