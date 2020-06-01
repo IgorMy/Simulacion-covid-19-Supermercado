@@ -249,6 +249,7 @@ to apply-forces
       ;set pcolor red
       die  ; La particula se adhiere a la superficie
     ]
+    if pcolor = black [die] ;Llega al limite del supermercado
     if new-x >= 29 or new-y >= max-pycor or new-x <= min-pxcor or new-y <= min-pycor [die]
     setxy new-x new-y
   ]
@@ -274,6 +275,7 @@ to estornuda
       ;show direccion
       let acel-x 20
       let acel-y 30
+      ;Particula dirigida hacia donde mira la persona que estornuda
       if direccion = 0 [set vel-x random 15 - 7  set vel-y (random-float 1) * acel-y]
       if direccion = 90 [set vel-x (random-float 1) * acel-x  set vel-y random 15 - 7]
       if direccion = 270 [set vel-x random 15 - 7 set vel-y (random-float 1 - 1) * acel-y]
