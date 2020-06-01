@@ -22,6 +22,8 @@ globals[
   afectados
   dia
   ticks-dia
+  tiempo-medio
+  num-clientes
 ]
 
 ; propiedades de los muros
@@ -40,6 +42,8 @@ turtles-own[
   infectado
   edad
   genero
+  tick-entrada
+  tick-salida
 ]
 
 ; propiedades de las personas
@@ -63,11 +67,10 @@ breed [dependientes dependiente]
 ; setup
 
 to setup
-
   ; Configuraciones basicas del mundo
   ca ; Limpiar la pantalla
   reset-ticks ; se ponen los tick a 0
-  set ticks-dia 300 ; Duracion de un dia en ticks
+  set ticks-dia 900 ; Duracion de un dia en ticks
   set dia 1 ; Contador dias
   set step-size 0.07 ; movimiento de las particulas
   set aforo-actual 0
@@ -77,6 +80,8 @@ to setup
   set curados-total 0
   set UCI-total 0
   set afectados 0
+  set tiempo-medio 0
+  set num-clientes 0
 
   ; dibujado de paredes
   ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
@@ -119,6 +124,8 @@ to setup
     set curado false
     set dias 0
     ifelse random 2 = 0 [set genero "M"][set genero "F"]
+    set tick-entrada -1
+    set tick-salida -1
   ]
 
   ; Se establecen los enfermos y se reparten tanto los guantes como las mascarillas
@@ -309,6 +316,7 @@ end
 to movimiento-agente
   ask personas with [(lista-de-la-compra > 0 or (lista-de-la-compra = 0 and xcor < 29 )) and not muerto and not UCI] [
     ifelse estado = 0 [
+      set tick-entrada ticks
       colocar-en-la-tienda
     ][
       ifelse estado = 1 [
@@ -318,6 +326,9 @@ to movimiento-agente
           movimiento-tienda
         ][
           salir
+          set tick-salida ticks
+
+
         ]
       ]
     ]
@@ -414,7 +425,7 @@ to mirar-objetos-cercanos
 
 
     ; Contagiar/se objeto en estanteria al tocarlo sin guantes
-    if tcarga-virica > random 20 and guantes = false and not curado [ask patch x y [set pcarga-virica pcarga-virica + 1]  output-show (word "infecta el objeto " x "-" y)]
+    if tcarga-virica > random 20 and (guantes = false or mascarilla = false) and not curado [ask patch x y [set pcarga-virica pcarga-virica + 1]  output-show (word "infecta el objeto " x "-" y)]
     if guantes = false and muro-infectado and not curado [set tcarga-virica tcarga-virica + 1 cambiar-label-color if infectado = false [set infectado true set infectados-hoy infectados-hoy + 1 output-show (word "se infecta al tocar el objeto " x "-" y)]]
 
     set size 1
@@ -444,6 +455,9 @@ to salir
           ][
             ifelse estado = 8[
               salir-3
+              set num-clientes num-clientes + 1
+              set tiempo-medio (tiempo-medio + (tick-salida - tick-entrada)) / 2
+              show tick-salida - tick-entrada
             ][
               ifelse estado = 9[
                 esperar
@@ -485,7 +499,7 @@ end
 
 to ir-dependiente-3
   let cola 0
-  ask patch xcor (ycor - 1) [set cola count turtles-here with [breed != particulas] ]
+  ask patch xcor (ycor - 1) [set cola count turtles-here]
   if cola = 0 [ ; cola de espera
     fd 1
     if ycor = 4 [
@@ -708,7 +722,7 @@ wind
 wind
 0
 1
-0.9
+1.0
 0.1
 1
 NIL
@@ -738,7 +752,7 @@ Aforo
 Aforo
 0
 50
-44.0
+15.0
 1
 1
 NIL
@@ -768,7 +782,7 @@ SLIDER
 %_de_contagio
 0
 100
-40.0
+31.0
 1
 1
 NIL
@@ -783,7 +797,7 @@ SLIDER
 %_de_guantes
 0
 100
-41.0
+91.0
 1
 1
 NIL
@@ -798,7 +812,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-59.0
+95.0
 1
 1
 NIL
@@ -845,7 +859,7 @@ SLIDER
 %contagio_inicial
 1
 100
-16.0
+5.0
 1
 1
 NIL
@@ -860,7 +874,7 @@ prob_contagio_mascarilla
 prob_contagio_mascarilla
 0
 100
-42.0
+15.0
 1
 1
 NIL
@@ -1008,13 +1022,13 @@ PLOT
 1465
 847
 Gráfica diaria
-Ticks
+Días
 Personas
 0.0
-30.0
+60.0
 0.0
 50.0
-true
+false
 true
 "" ""
 PENS
@@ -1024,15 +1038,15 @@ PENS
 "Fallecidos" 1.0 1 -16777216 true "" ""
 
 MONITOR
-98
-633
-194
-698
+1473
+604
+1548
+653
 Día Actual
 dia
 0
 1
-16
+12
 
 MONITOR
 263
@@ -1081,6 +1095,39 @@ numero-productos
 1
 NIL
 HORIZONTAL
+
+MONITOR
+113
+736
+255
+785
+Tiempo medio (h)
+tiempo-medio / ticks-dia * 24
+4
+1
+12
+
+MONITOR
+14
+736
+111
+785
+Clientes totales
+num-clientes
+0
+1
+12
+
+MONITOR
+63
+611
+195
+660
+Afectados actuales
+count personas with [tcarga-virica > 0]
+2
+1
+12
 
 @#$#@#$#@
 ## WHAT IS IT?
