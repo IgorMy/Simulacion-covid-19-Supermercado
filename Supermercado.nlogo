@@ -22,8 +22,6 @@ globals[
   afectados
   dia
   ticks-dia
-  tiempo-medio
-  num-clientes
 ]
 
 ; propiedades de los muros
@@ -70,7 +68,7 @@ to setup
   ; Configuraciones basicas del mundo
   ca ; Limpiar la pantalla
   reset-ticks ; se ponen los tick a 0
-  set ticks-dia 900 ; Duracion de un dia en ticks
+  set ticks-dia 300 ; Duracion de un dia en ticks
   set dia 1 ; Contador dias
   set step-size 0.07 ; movimiento de las particulas
   set aforo-actual 0
@@ -80,8 +78,6 @@ to setup
   set curados-total 0
   set UCI-total 0
   set afectados 0
-  set tiempo-medio 0
-  set num-clientes 0
 
   ; dibujado de paredes
   ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
@@ -455,9 +451,6 @@ to salir
           ][
             ifelse estado = 8[
               salir-3
-              set num-clientes num-clientes + 1
-              set tiempo-medio (tiempo-medio + (tick-salida - tick-entrada)) / 2
-              show tick-salida - tick-entrada
             ][
               ifelse estado = 9[
                 esperar
@@ -499,7 +492,7 @@ end
 
 to ir-dependiente-3
   let cola 0
-  ask patch xcor (ycor - 1) [set cola count turtles-here]
+  ask patch xcor (ycor - 1) [set cola count turtles-here with [breed != particulas]]
   if cola = 0 [ ; cola de espera
     fd 1
     if ycor = 4 [
@@ -1095,28 +1088,6 @@ numero-productos
 1
 NIL
 HORIZONTAL
-
-MONITOR
-113
-736
-255
-785
-Tiempo medio (h)
-tiempo-medio / ticks-dia * 24
-4
-1
-12
-
-MONITOR
-14
-736
-111
-785
-Clientes totales
-num-clientes
-0
-1
-12
 
 MONITOR
 63
