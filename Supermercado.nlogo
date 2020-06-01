@@ -1103,19 +1103,32 @@ count personas with [tcarga-virica > 0]
 @#$#@#$#@
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
-
-## HOW IT WORKS
-
-(what rules the agents use to create the overall behavior of the model)
+Modelo de un supermercado generico en el contexto de la crisis desatada por la pandemia del COVID19.
 
 ## HOW TO USE IT
+La simulación presenta dos botones:
 
-(how to use the model, including a description of each of the items in the Interface tab)
+* Setup: para inicializar el mundo el mundo
+* go: para ejecutar la simulación
 
-## THINGS TO NOTICE
+La simulación presenta 13 sliders:
 
-(suggested things for the user to notice while running the model)
+* poblacion: numero de personas sobre las que se realizara el estudio.
+* % de contagio inicial:  establece el numero de contagios que hay inicialmente.
+* aforo: numero de personas que pueden estar simultaneamente en el supermercado.
+* % de guantes: establece el numero de personas que tendran guantes.
+* % de mascarillas: establece el numero de personas que tendran mascarillas.
+* prob contagio mascarillas: establece la probabilidad de contagio llevando una mascarilla.
+* maxTiempo: define el timepo maximo de vida de una particula.
+* num-particulas: el numero maximo de particulas que echara un agente al estornudar.
+* % de contagio: controla la posibilidad de que un agente respire cerca de una particula.
+* wind: establece la fuerza del viendo que empuja las particulas hacia el suelo.
+* Camillas-UCI: establece el numero máximo de personas en un hospital, en UCI.
+* ancho-pasillo: considerando como 1 un pasillo basico donde la salida del aire esta mas concentrada, reducira el tiempo de vida de las particulas. Siendo 2 un pasillo mas ancho con el aire un poco mas distribuido.
+* numero-productos: establece el numero maximo de productos que puede comprar el cliente, controlado de esta forma el timepo que pasara en el supermercado.
+
+Para ejecutar correctamente la simulación, se deben establecer los parametros de los primeros 4 sliders, ejecutar el Setup para inicializar el modelo y ejecutar el go. Los demas sliders se pueden variar durante la ejecucion.
+
 
 ## THINGS TO TRY
 
@@ -1123,19 +1136,16 @@ count personas with [tcarga-virica > 0]
 
 ## EXTENDING THE MODEL
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+* En vez de una población cerrada que no interactua fuera del supermercado, establecer casas, comunidades, amigos ...
+* Contar a los dependientes de la tienda dentro del estudio
 
 ## NETLOGO FEATURES
 
 (interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
 
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
-
 ## CREDITS AND REFERENCES
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+ Víctor Manuel Rodríguez Navarro y Ihar Myshkevich
 @#$#@#$#@
 default
 true
