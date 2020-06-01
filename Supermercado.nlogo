@@ -629,7 +629,7 @@ end
 
 to Ingresa
   if count turtles with [UCI = true] < Camillas-UCI [
-    output-show " INGRESA UCI"
+    output-show (word "INGRESA UCI (EDAD: " edad " SEXO: " genero ")")
     move-to one-of patches with [pcolor = orange and pxcor > 29]
     set UCI true
     set UCI-hoy UCI-hoy + 1 ; Aumentamos el contador diario
@@ -643,7 +643,7 @@ end
 
 to Muere
   move-to one-of patches with [pcolor = 3]
-  output-show " MUERE"
+  output-show (word "MUERE (EDAD: " edad " SEXO: " genero ")")
   set muerto true
   set muertos-hoy muertos-hoy + 1 ; Aumentamos el contador
   if UCI = true [
@@ -659,7 +659,7 @@ end
 
 to Sana
   move-to one-of patches with [pcolor = 116]
-  output-show " SE CURA"
+  output-show (word "SE CURA (EDAD: " edad " SEXO: " genero ")")
   set tcarga-virica 0
   cambiar-label-color
   set curado true
@@ -772,7 +772,7 @@ Aforo
 Aforo
 0
 50
-15.0
+20.0
 1
 1
 NIL
@@ -817,7 +817,7 @@ SLIDER
 %_de_guantes
 0
 100
-61.0
+100.0
 1
 1
 NIL
@@ -832,7 +832,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-61.0
+100.0
 1
 1
 NIL
@@ -864,7 +864,7 @@ num-particles
 num-particles
 5
 10
-7.0
+6.0
 1
 1
 NIL
@@ -879,7 +879,7 @@ SLIDER
 %contagio_inicial
 1
 100
-20.0
+5.0
 1
 1
 NIL
@@ -931,7 +931,7 @@ Camillas-UCI
 Camillas-UCI
 1
 50
-29.0
+50.0
 1
 1
 NIL
@@ -1095,7 +1095,7 @@ ancho-pasillo
 ancho-pasillo
 1
 2
-2.0
+1.0
 1
 1
 NIL
