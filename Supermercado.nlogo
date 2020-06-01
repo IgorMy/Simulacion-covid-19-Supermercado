@@ -15,6 +15,11 @@ globals[
   muertos-hoy
   curados-hoy
   UCI-hoy
+  infectados-total
+  muertos-total
+  curados-total
+  UCI-total
+  afectados
   dia
   ticks-dia
 ]
@@ -67,6 +72,11 @@ to setup
   set step-size 0.07 ; movimiento de las particulas
   set aforo-actual 0
 
+  set infectados-total 0
+  set muertos-total 0
+  set curados-total 0
+  set UCI-total 0
+  set afectados 0
 
   ; dibujado de paredes
   ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
@@ -135,7 +145,6 @@ end
 ; metodo go
 
 to go
-
   ; parar la simulación al final del dia 60
   if ticks = ticks-dia * 60 [ stop ]
 
@@ -156,6 +165,9 @@ to go
     set curados-hoy 0
     set muertos-hoy 0
     set UCI-hoy 0
+
+    ; Actualizamos estadisticas afectados totales
+    set afectados count personas with[tcarga-virica > 0 or UCI or muerto or curado]
   ]
 
   ; Comprobación extra por si acaso no se ha coloreado algun enfermo
@@ -576,6 +588,11 @@ to pasa-un-dia
     output-show (word "FALLECIDOS HOY: " muertos-hoy)
     output-show (word "CURADOS HOY: " curados-hoy)
     output-show (word "- DIA " dia " -")
+
+    set infectados-total infectados-total + infectados-hoy
+    set UCI-total UCI-total + UCI-hoy
+    set muertos-total muertos-total + muertos-hoy
+    set curados-total curados-total + curados-hoy
 end
 
 to Ingresa
@@ -719,7 +736,7 @@ Aforo
 Aforo
 0
 50
-34.0
+44.0
 1
 1
 NIL
@@ -826,7 +843,7 @@ SLIDER
 %contagio_inicial
 1
 100
-15.0
+16.0
 1
 1
 NIL
@@ -853,7 +870,7 @@ MONITOR
 286
 661
 Infectados
-count personas with[tcarga-virica > 0]
+infectados-total
 17
 1
 14
@@ -864,7 +881,7 @@ MONITOR
 284
 722
 % Infectados
-count personas with [tcarga-virica > 0] / población * 100
+infectados-total / población * 100
 2
 1
 14
@@ -890,7 +907,7 @@ MONITOR
 346
 661
 UCI
-count turtles with [UCI = true]
+UCI-total
 0
 1
 14
@@ -901,7 +918,7 @@ MONITOR
 429
 660
 Fallecidos
-count personas with [muerto = true]
+muertos-total
 1
 1
 14
@@ -912,7 +929,7 @@ MONITOR
 506
 661
 Curados
-count personas with [curado = true]
+curados-total
 1
 1
 14
@@ -923,29 +940,29 @@ MONITOR
 348
 722
 % UCI
-count personas with [UCI = true] / población * 100
+UCI-total / afectados * 100
 2
 1
 14
 
 MONITOR
-354
-666
-430
-723
-% Fallecidos
-count personas with [muerto = true] / población * 100
+353
+664
+435
+721
+Letalidad %
+muertos-total / afectados * 100
 2
 1
 14
 
 MONITOR
-434
-666
-508
-723
+438
+665
+521
+722
 % Curados
-count personas with [curado = true] / población * 100
+curados-total / afectados * 100
 2
 1
 14
@@ -975,10 +992,10 @@ PENS
 MONITOR
 349
 729
-510
+472
 786
-% Fallecidos / Afectados
-count personas with [muerto = true] / count personas with [tcarga-virica > 0 or UCI = true or curado = true or muerto = true] * 100
+Mortalidad %
+count personas with [muerto = true] / población * 100
 2
 1
 14
@@ -1021,7 +1038,7 @@ MONITOR
 345
 787
 Afectados
-count personas with[tcarga-virica > 0 or UCI or muerto or curado]
+afectados
 0
 1
 14
