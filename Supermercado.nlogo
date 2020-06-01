@@ -40,8 +40,6 @@ turtles-own[
   infectado
   edad
   genero
-  tick-entrada
-  tick-salida
 ]
 
 ; propiedades de las personas
@@ -120,8 +118,6 @@ to setup
     set curado false
     set dias 0
     ifelse random 2 = 0 [set genero "M"][set genero "F"]
-    set tick-entrada -1
-    set tick-salida -1
   ]
 
   ; Se establecen los enfermos y se reparten tanto los guantes como las mascarillas
@@ -234,6 +230,10 @@ to go
   tick
 end
 
+
+; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; particulas
+
 to apply-gravity
   set force-y force-y - wind
 end
@@ -270,6 +270,9 @@ to compute-forces
 
 end
 
+; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; estornudo del agente
+
 to estornuda
   if tcarga-virica > 0 [ ; Solucion de mierda
     set ha-estornudado 10
@@ -294,6 +297,9 @@ to estornuda
   ]
 end
 
+; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; respiración del agente
+
 to respira
   hatch-particulas num-particles * 0.05 * tcarga-virica [
     set vel-x 10 - (random-float 20) ; velocidad x inicial
@@ -309,10 +315,10 @@ end
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
 ; movimiento de los agentes
 
+; primera parte de la maquina de estados
 to movimiento-agente
   ask personas with [(lista-de-la-compra > 0 or (lista-de-la-compra = 0 and xcor < 29 )) and not muerto and not UCI] [
     ifelse estado = 0 [
-      set tick-entrada ticks
       colocar-en-la-tienda
     ][
       ifelse estado = 1 [
@@ -322,7 +328,6 @@ to movimiento-agente
           movimiento-tienda
         ][
           salir
-          set tick-salida ticks
 
 
         ]
@@ -331,6 +336,7 @@ to movimiento-agente
   ]
 end
 
+; Primer estado, el agente aparece en la puerta
 to colocar-en-la-tienda
   set xcor random 4 + 1
   set ycor 0
@@ -338,6 +344,7 @@ to colocar-en-la-tienda
   set estado 1
 end
 
+; Segundo estado, el agente sube hacia arriba hacia el primer pasillo y gira su cabeza a la derecha
 to movimiento-tienda-entrada
   ifelse ycor < 7 [
     fd 1
@@ -347,6 +354,7 @@ to movimiento-tienda-entrada
   ]
 end
 
+; Tercer estado, movimiento en la tienda aleatoria con restricciones para que parezca natural
 to movimiento-tienda
 
   if lista-de-la-compra > 0 [
@@ -389,6 +397,8 @@ to movimiento-tienda
   ]
 end
 
+
+; el agente coge el objeto de la estanteria cercana
 to mirar-objetos-cercanos
   let x 0
   let y 0
@@ -432,7 +442,7 @@ to mirar-objetos-cercanos
 end
 
 
-
+; Segunda parte de la maquina de estados, esta se ejecuta una vez que el agente ha cogido todos los producto y esta en la fila de abajo
 to salir
   ifelse estado = 3 [
     ir-dependiente-1
@@ -465,6 +475,7 @@ to salir
   ]
 end
 
+; Cuarto estado, el agente se mueve al pasillo de los dependientes
 to ir-dependiente-1
   set heading 180
   fd 1
@@ -482,6 +493,7 @@ to ir-dependiente-1
   ]
 end
 
+; Quinto estado, el agente se mueve al pasillo del dependiente ha seleccionado en el estado anterior
 to ir-dependiente-2
   fd 1
   if xcor = posicion-objetivo[
@@ -490,6 +502,7 @@ to ir-dependiente-2
   ]
 end
 
+; Sexto estado, el agente se coloca en cola y va bajando hasta llegar al dependiente
 to ir-dependiente-3
   let cola 0
   ask patch xcor (ycor - 1) [set cola count turtles-here with [breed != particulas]]
@@ -503,6 +516,8 @@ to ir-dependiente-3
   ]
 end
 
+; Los siguientes dos estados se añadieron al final, por eso tienen numeros diferentes.
+; decimo estado, el agente esta pagando al dependiente
 to esperar
   set espera espera - 3
   if espera <= 0 [
@@ -511,6 +526,7 @@ to esperar
   ]
 end
 
+; onceavo estado, el agente termina de pagar y se prepara para seguir su camino
 to salir-espera
   set size 1
     set heading 180
@@ -518,6 +534,7 @@ to salir-espera
     set posicion-objetivo 1 + random 2
 end
 
+; Septimo estado, el agente ha terminado de pagar, y se mueve hacia abajo al pasillo de salida
 to salir-1
   fd 1
   if ycor = posicion-objetivo [
@@ -527,6 +544,7 @@ to salir-1
   ]
 end
 
+; Octavo estado, el agente se mueve a la izquierda hacia la salida
 to salir-2
   fd 1
   if xcor = posicion-objetivo [
@@ -535,6 +553,7 @@ to salir-2
   ]
 end
 
+; Noveno estado, el agente sale del supermercado
 to salir-3
   fd ycor
   set posicion-objetivo 0
@@ -542,7 +561,10 @@ to salir-3
   move-to one-of patches with [pcolor = 116]
   set aforo-actual aforo-actual - 1
 end
-;---------------------------------------------------------------------------------------------------
+
+; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; Comprobación de los agentes enfermos
+
 to pasa-un-dia
 
   set dia dia + 1
@@ -592,6 +614,7 @@ to pasa-un-dia
     ]
   ]
 
+  ; Estadisticas
     output-show (word "INFECTADOS HOY: " infectados-hoy)
     output-show (word "UCI HOY: " UCI-hoy)
     output-show (word "FALLECIDOS HOY: " muertos-hoy)
@@ -646,6 +669,10 @@ to Sana
     set UCI false
   ]
 end
+
+; ------------------------------------------------------------------------------------------------------------------------------------------------------
+; dibujo de graficas
+
 
 to dibujar-graficas
   ask one-of turtles [
