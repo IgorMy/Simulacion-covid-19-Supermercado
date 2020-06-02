@@ -744,10 +744,10 @@ NIL
 1
 
 SLIDER
-13
-452
-185
-485
+11
+417
+183
+450
 wind
 wind
 0
@@ -812,7 +812,7 @@ SLIDER
 %_de_guantes
 0
 100
-100.0
+48.0
 1
 1
 NIL
@@ -827,7 +827,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-100.0
+43.0
 1
 1
 NIL
@@ -892,10 +892,10 @@ infectados-total
 14
 
 MONITOR
-198
-665
-284
-722
+183
+667
+269
+724
 % Infectados
 infectados-total / población * 100
 2
@@ -903,10 +903,10 @@ infectados-total / población * 100
 14
 
 SLIDER
-13
-493
-185
-526
+11
+458
+183
+491
 Camillas-UCI
 Camillas-UCI
 1
@@ -951,10 +951,10 @@ curados-total
 14
 
 MONITOR
-289
-665
-348
-722
+274
+667
+333
+724
 % UCI
 UCI-total / afectados * 100
 2
@@ -962,10 +962,10 @@ UCI-total / afectados * 100
 14
 
 MONITOR
-353
-664
-435
-721
+338
+666
+420
+723
 Letalidad %
 muertos-total / afectados * 100
 2
@@ -973,10 +973,10 @@ muertos-total / afectados * 100
 14
 
 MONITOR
-438
-665
-521
-722
+423
+667
+506
+724
 % Curados
 curados-total / afectados * 100
 2
@@ -1006,10 +1006,10 @@ PENS
 "Colapso Sistema" 1.0 0 -5825686 true "" "plot Camillas-UCI"
 
 MONITOR
-349
-729
-472
-786
+383
+731
+506
+788
 Mortalidad %
 count personas with [muerto = true] / población * 100
 2
@@ -1049,10 +1049,10 @@ dia
 12
 
 MONITOR
-263
-730
-345
-787
+297
+732
+379
+789
 Afectados
 afectados
 0
@@ -1067,10 +1067,10 @@ OUTPUT
 11
 
 SLIDER
-13
-535
-185
-568
+11
+500
+183
+533
 ancho-pasillo
 ancho-pasillo
 1
@@ -1082,10 +1082,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-15
-573
-187
-606
+13
+538
+185
+571
 numero-productos
 numero-productos
 3
@@ -1097,26 +1097,15 @@ NIL
 HORIZONTAL
 
 MONITOR
-60
-610
-192
-659
+158
+732
+290
+781
 Afectados actuales
 count personas with [tcarga-virica > 0]
 2
 1
 12
-
-MONITOR
-130
-665
-187
-718
-dias
-ticks / 300
-0
-1
-13
 
 CHOOSER
 11
@@ -1126,7 +1115,7 @@ CHOOSER
 tipo_mascarilla
 tipo_mascarilla
 "Quirurjica" "FFP1" "FFP2" "FFP3"
-3
+2
 
 SLIDER
 7
