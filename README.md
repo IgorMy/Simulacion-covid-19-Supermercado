@@ -2,5 +2,5 @@
 :office: Universidad de Huelva (UHU)  
 :calendar: Curso 2019-2020  
 :mortar_board: Sistemas Inteligentes  
-:octocat: Ihar Myshkevich  
-:octocat:  Víctor Manuel Rodríguez Navarro
+:octocat: [Ihar Myshkevich](https://github.com/IgorMy)  
+:octocat: [Víctor Manuel Rodríguez Navarro](https://github.com/Narovik)
