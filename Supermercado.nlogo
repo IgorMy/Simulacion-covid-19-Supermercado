@@ -284,14 +284,12 @@ end
 ; estornudo del agente
 
 to estornuda
-  if tcarga-virica > 0 [
     set ha-estornudado 10
     let direccion heading
     let efectividad 0
-    if mascarilla = true [set efectividad mascarilla_mal_colocada] ; Probabilidad de colocarse mal la mascarilla y que sea inefectiva
-    if efectividad > random 100 [
+    if mascarilla = true [set efectividad 100 - mascarilla_mal_colocada] ; Probabilidad de colocarse mal la mascarilla y que sea inefectiva
+    if efectividad < random 100 [
       hatch-particulas num-particles * tcarga-virica / 10 [
-        ;show direccion
         let acel-x 20
         let acel-y 30
         ;Particula dirigida hacia donde mira la persona que estornuda
@@ -308,7 +306,7 @@ to estornuda
         set label ""
       ]
     ]
-  ]
+
 end
 
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -342,8 +340,6 @@ to movimiento-agente
           movimiento-tienda
         ][
           salir
-
-
         ]
       ]
     ]
@@ -771,7 +767,7 @@ maxTiempo
 maxTiempo
 5
 15
-15.0
+10.0
 1
 1
 NIL
@@ -863,7 +859,7 @@ num-particles
 num-particles
 5
 10
-9.0
+6.0
 1
 1
 NIL
@@ -878,7 +874,7 @@ SLIDER
 %contagio_inicial
 1
 100
-10.0
+5.0
 1
 1
 NIL
@@ -1094,7 +1090,7 @@ numero-productos
 numero-productos
 3
 15
-9.0
+5.0
 1
 1
 NIL
@@ -1130,7 +1126,7 @@ CHOOSER
 tipo_mascarilla
 tipo_mascarilla
 "Quirurjica" "FFP1" "FFP2" "FFP3"
-0
+3
 
 SLIDER
 7
@@ -1141,7 +1137,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-70.0
+0.0
 1
 1
 %
@@ -1164,8 +1160,6 @@ La simulación presenta 13 sliders:
 * % de contagio inicial:  establece el numero de contagios que hay inicialmente.
 * aforo: numero de personas que pueden estar simultaneamente en el supermercado.
 * % de guantes: establece el numero de personas que tendran guantes.
-* % de mascarillas: establece el numero de personas que tendran mascarillas.
-* prob contagio mascarillas: establece la probabilidad de contagio llevando una mascarilla.
 * maxTiempo: define el timepo maximo de vida de una particula.
 * num-particulas: el numero maximo de particulas que echara un agente al estornudar.
 * % de contagio: controla la posibilidad de que un agente respire cerca de una particula.
@@ -1173,6 +1167,13 @@ La simulación presenta 13 sliders:
 * Camillas-UCI: establece el numero máximo de personas en un hospital, en UCI.
 * ancho-pasillo: considerando como 1 un pasillo basico donde la salida del aire esta mas concentrada, reducira el tiempo de vida de las particulas. Siendo 2 un pasillo mas ancho con el aire un poco mas distribuido.
 * numero-productos: establece el numero maximo de productos que puede comprar el cliente, controlado de esta forma el timepo que pasara en el supermercado.
+* % de mascarillas: establece el numero de personas que tendran mascarillas.
+* mascarilla_mal_colocada: probabilidad de colocarse la mascarilla de forma inadeacuada, de modo que no evitará la propagación de partículas al estornudar
+#### Tipos de mascarilla (prob_contagio_mascarilla)
+* Quirúrgicas: son las más comunes y usadas entre los ciudadanos. Se ha demostrado que no son eficaces para evitar el contagio si hay partículas en el aire, pero ayudan a retener y no propagar estas partículas al toser o estornudar.
+* FFP1 (filtro  de  partículas  tipo  P1):  tienen  una  eficacia  de  filtración  mínima  del  78%.  Suelen emplearse frente a partículas de material inerte, y no se recomiendan para uso médico.
+* FFP2 (filtro  de  partículas  tipo  P2):  tienen  una  eficacia  de  filtración  mínima  del  92%. Se utilizan frente a aerosoles de baja o moderada toxicidad
+* FFP3 (filtro  de  partículas  tipo  P3):  tienen  una  eficacia  de  filtración  mínima  del  98%. Se utilizan frente a aerosoles de alta toxicidad.
 
 Para ejecutar correctamente la simulación, se deben establecer los parametros de los primeros 4 sliders, ejecutar el Setup para inicializar el modelo y ejecutar el go. Los demas sliders se pueden variar durante la ejecucion.
 
@@ -1181,14 +1182,11 @@ Para ejecutar correctamente la simulación, se deben establecer los parametros d
 
 #### Modelos de simulación propuestos
 
-* Caso Peor: Un aforo máximo de personas, sin mascarilla ni guantes
+#### Caso Peor
+* Setup: Un aforo máximo de personas, sin mascarilla ni guantes, con una lista de la compra con muchos productos.
+* Resultado: Los infectados se disparan los primeros días, y a partir del séptimo día, cuando los síntomas aparecen, la UCI se colapsa (línea morada en la gráfica), haciendo que personas ajenas a esta enfermedad tampoco puedan ser atendidas.
 
-#### Tipos de mascarilla (prob_contagio_mascarilla)
 
-* Quirúrgicas: son las más comunes y usadas entre los ciudadanos. Se ha demostrado que no son eficaces para evitar el contagio si hay partículas en el aire, pero ayudan a retener y no propagar estas partículas al toser o estornudar.
-* FFP1 (filtro  de  partículas  tipo  P1):  tienen  una  eficacia  de  filtración  mínima  del  78%.  Suelen emplearse frente a partículas de material inerte, y no se recomiendan para uso médico.
-* FFP2 (filtro  de  partículas  tipo  P2):  tienen  una  eficacia  de  filtración  mínima  del  92%. Se utilizan frente a aerosoles de baja o moderada toxicidad
-* FFP3 (filtro  de  partículas  tipo  P3):  tienen  una  eficacia  de  filtración  mínima  del  98%. Se utilizan frente a aerosoles de alta toxicidad.
 	
 
 ## EXTENDING THE MODEL
@@ -1203,6 +1201,11 @@ Para ejecutar correctamente la simulación, se deben establecer los parametros d
 ## CREDITS AND REFERENCES
 
  Víctor Manuel Rodríguez Navarro y Ihar Myshkevich
+
+#### Bibliografía
+https://www.riojasalud.es/rrhh-files/rrhh/proteccion-respiratoria-rev-3175.pdf
+https://www.urgenciasyemergen.com/coronavirus-mascarillas-y-evidencia-cientifica/
+https://cdn.statcdn.com/Infographic/images/normal/21772.jpeg
 @#$#@#$#@
 default
 true
