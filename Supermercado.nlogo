@@ -791,7 +791,7 @@ Aforo
 Aforo
 0
 50
-10.0
+20.0
 1
 1
 NIL
@@ -821,7 +821,7 @@ SLIDER
 %_de_guantes
 0
 100
-95.0
+90.0
 1
 1
 NIL
@@ -836,7 +836,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-100.0
+80.0
 1
 1
 NIL
@@ -920,7 +920,7 @@ Camillas-UCI
 Camillas-UCI
 1
 50
-50.0
+25.0
 1
 1
 NIL
@@ -1099,7 +1099,7 @@ numero-productos
 numero-productos
 3
 15
-5.0
+6.0
 1
 1
 NIL
@@ -1124,7 +1124,7 @@ CHOOSER
 tipo_mascarilla
 tipo_mascarilla
 "Quirurjica" "FFP1" "FFP2" "FFP3"
-1
+0
 
 SLIDER
 10
@@ -1135,7 +1135,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-0.0
+25.0
 1
 1
 %
@@ -1200,15 +1200,21 @@ Para ejecutar correctamente la simulación, se deben establecer los parametros d
 
 ## THINGS TO TRY
 
-#### Modelos de simulación propuestos
+#### Escenarios de simulación propuestos
 
-#### Caso Peor
+#### Escenario Peor
 * Setup: Un aforo máximo de personas, sin mascarilla ni guantes, con una lista de la compra con muchos productos.
 * Resultado: Los infectados se disparan los primeros días, y a partir del séptimo día, cuando los síntomas aparecen, la UCI se colapsa (línea morada en la gráfica), haciendo que personas ajenas a esta enfermedad tampoco puedan ser atendidas.
 
-#### Caso Mejor
+#### Escenario Mejor
 * Setup: Aforo reducido de personas en el supermercado (10-20), todas llevando mascarilllas FFP que protegen de las partículas inhaladas (y puestas de forma correcta), así como guantes para no contaminar los productos manipulados. Además con una lista de la compra reducida con tal de minimizar el tiempo en el supermercado.
 * Resultado: los casos apenas varían a los infectados inicialmente, teniendo estos una incidencia mínima sobre el resto de la población, ya que gracias a las mascarillas FFP y los guantes, resulta muy poco probable ser contagiado.
+
+#### Escenario realista
+* Setup: Un aforo reducido de personas en el supermercado (10-20). Al entrar al supermercado, es obligatorio el uso de guantes, por lo que casi todos los clientes lo llevan (95-100%). El uso de mascarillas en supermercado es muy habitual (70-85%), aunque son de tipo quirúrgica, esto es, que no protegen de las partículas en el aire, aunque evitan expulsar partículas al exterior.  Por último, una lista reducida de productos (5-10).
+* Resultado: la mayoría de afectados logran curarse. Lo más notable de esta configuración es que no llega a colapsarse el sistema sanitario. Por otro lado, la mortalidad se estima en un 2-3% lo que se ajusta bastante a los datos de España a mes de mayo. A veces, en la simulación se pueden dar varios brotes de infección, debido a la coincidencia de algún individuo infectado con otro que no lleve las medidas de protección adecuadas
+
+
 
 
 ## EXTENDING THE MODEL
