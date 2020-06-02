@@ -191,8 +191,15 @@ to go
   ]
 
   ; Contagio por contacto con particula en aire. 100% si no lleva mascarilla, proba_contagio_mascarilla% si lleva. Marcar a infectado si no lo está
+  let efectividad 0 ;
+  if tipo_mascarilla = "Quirurjica" [set efectividad 10]
+  if tipo_mascarilla = "FFP1" [set efectividad 78]
+  if tipo_mascarilla = "FFP2" [set efectividad 92]
+  if tipo_mascarilla = "FFP3" [set efectividad 98]
+
+
   ask personas with [
-    (xcor < 29 and (mascarilla = false or ( mascarilla = true and prob_contagio_mascarilla < random 100))) and ha-estornudado = 0 and random 101 < %_de_contagio and not curado
+    xcor < 29 and ((mascarilla = true and efectividad < random 100) or mascarilla = false) and ha-estornudado = 0 and not curado
   ] [
 
     let hay-particula 0
@@ -215,8 +222,10 @@ to go
   ]
 
   ; Personas sin mascarilla, expulsan particulas por esturnudo cada 5 ticks
-  let personas-dentro count personas with [xcor < 29 and mascarilla = false and tcarga-virica > 0]
-  ask n-of (random personas-dentro) personas with [xcor < 29 and mascarilla = false and tcarga-virica > 0] [if ticks mod 5 = 0 [estornuda]]
+  if ticks mod 5 = 0[
+    let personas-dentro count personas with [xcor < 29 and tcarga-virica > 0]
+    ask n-of (random personas-dentro) personas with [xcor < 29 and tcarga-virica > 0] [estornuda]
+  ]
 
   ; Movimiento de particulas
   compute-forces
@@ -762,7 +771,7 @@ maxTiempo
 maxTiempo
 5
 15
-10.0
+15.0
 1
 1
 NIL
@@ -799,21 +808,6 @@ NIL
 HORIZONTAL
 
 SLIDER
-12
-418
-184
-451
-%_de_contagio
-%_de_contagio
-0
-100
-32.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
 9
 188
 181
@@ -837,7 +831,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-95.0
+100.0
 1
 1
 NIL
@@ -869,7 +863,7 @@ num-particles
 num-particles
 5
 10
-6.0
+9.0
 1
 1
 NIL
@@ -885,21 +879,6 @@ SLIDER
 1
 100
 10.0
-1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-1483
-666
-1659
-699
-prob_contagio_mascarilla
-prob_contagio_mascarilla
-0
-100
-15.0
 1
 1
 NIL
@@ -1100,7 +1079,7 @@ ancho-pasillo
 ancho-pasillo
 1
 2
-1.0
+2.0
 1
 1
 NIL
@@ -1162,7 +1141,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-25.0
+70.0
 1
 1
 %
