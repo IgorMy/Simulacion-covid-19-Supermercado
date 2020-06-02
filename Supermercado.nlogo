@@ -22,7 +22,8 @@ globals[
   afectados
   dia
   ticks-dia
-
+  UCI-hasta-los-15-dias
+  Muertos-hasta-los-21-dias
 ]
 
 ; propiedades de los muros
@@ -71,6 +72,8 @@ to setup
   set dia 1 ; Contador dias
   set step-size 0.07 ; movimiento de las particulas
   set aforo-actual 0
+  set UCI-hasta-los-15-dias 0
+  set Muertos-hasta-los-21-dias 0
 
   set infectados-total 0
   set muertos-total 0
@@ -160,6 +163,10 @@ to go
     ; dibujo de graficas
     dibujar-graficas
 
+    if ticks / ticks-dia < 15 [
+      set UCI-hasta-los-15-dias UCI-hasta-los-15-dias + UCI-hoy
+      set Muertos-hasta-los-21-dias Muertos-hasta-los-21-dias + muertos-hoy
+    ]
     ; Reiniciamos los casos diarios
     set infectados-hoy 0
     set curados-hoy 0
@@ -168,6 +175,8 @@ to go
 
     ; Actualizamos estadisticas afectados totales
     set afectados count personas with[tcarga-virica > 0 or UCI or muerto or curado]
+
+
   ]
 
   ; Comprobación extra por si acaso no se ha coloreado algun enfermo
@@ -1131,6 +1140,28 @@ mascarilla_mal_colocada
 1
 %
 HORIZONTAL
+
+MONITOR
+40
+614
+178
+659
+ UCI a los 15 dias
+UCI-hasta-los-15-dias
+17
+1
+11
+
+MONITOR
+49
+667
+178
+712
+Muertos a los 21 dias
+Muertos-hasta-los-21-dias
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
