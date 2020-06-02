@@ -536,7 +536,7 @@ end
 ; Los siguientes dos estados se añadieron al final, por eso tienen numeros diferentes.
 ; decimo estado, el agente esta pagando al dependiente
 to esperar
-  set espera espera - 3
+  set espera espera - 5
   if espera <= 0 [
     set estado 10
     set espera 0
@@ -1227,15 +1227,15 @@ muertos-80
 @#$#@#$#@
 ## WHAT IS IT?
 
-Modelo de un supermercado generico en el contexto de la crisis desatada por la pandemia del COVID19.
+Modelo de un supermercado generico en el contexto de la crisis desatada por la pandemia del COVID19. En él cual se pueden variar las caracteristicas tanto de la población como del supermercado. Ofreciendo asi unas estadisticas proximas a las reales. Permitiendo asi ver diferentes escenarios de la pandemia.
 
 ## HOW TO USE IT
-La simulación presenta dos botones:
+### La simulación presenta dos botones:
 
 * Setup: para inicializar el mundo el mundo
 * go: para ejecutar la simulación
 
-La simulación presenta 13 sliders:
+### La simulación presenta 13 sliders:
 
 * poblacion: numero de personas sobre las que se realizara el estudio.
 * % de contagio inicial:  establece el numero de contagios que hay inicialmente.
@@ -1250,7 +1250,7 @@ La simulación presenta 13 sliders:
 * numero-productos: establece el numero maximo de productos que puede comprar el cliente, controlado de esta forma el timepo que pasara en el supermercado.
 * % de mascarillas: establece el numero de personas que tendran mascarillas.
 * mascarilla_mal_colocada: probabilidad de colocarse la mascarilla de forma inadeacuada, de modo que no evitará la propagación de partículas al estornudar
-#### Tipos de mascarilla (prob_contagio_mascarilla)
+### Tipos de mascarilla (prob_contagio_mascarilla)
 * Quirúrgicas: son las más comunes y usadas entre los ciudadanos. Se ha demostrado que no son eficaces para evitar el contagio si hay partículas en el aire, pero ayudan a retener y no propagar estas partículas al toser o estornudar.
 * FFP1 (filtro  de  partículas  tipo  P1):  tienen  una  eficacia  de  filtración  mínima  del  78%.  Suelen emplearse frente a partículas de material inerte, y no se recomiendan para uso médico.
 * FFP2 (filtro  de  partículas  tipo  P2):  tienen  una  eficacia  de  filtración  mínima  del  92%. Se utilizan frente a aerosoles de baja o moderada toxicidad
@@ -1261,7 +1261,7 @@ Para ejecutar correctamente la simulación, se deben establecer los parametros d
 
 ## THINGS TO TRY
 
-#### Escenarios de simulación propuestos
+### Escenarios de simulación propuestos
 
 #### Escenario Peor
 * Setup: Un aforo máximo de personas, sin mascarilla ni guantes, con una lista de la compra con muchos productos.
@@ -1275,7 +1275,9 @@ Para ejecutar correctamente la simulación, se deben establecer los parametros d
 * Setup: Un aforo reducido de personas en el supermercado (10-20). Al entrar al supermercado, es obligatorio el uso de guantes, por lo que casi todos los clientes lo llevan (95-100%). El uso de mascarillas en supermercado es muy habitual (70-85%), aunque son de tipo quirúrgica, esto es, que no protegen de las partículas en el aire, aunque evitan expulsar partículas al exterior.  Por último, una lista reducida de productos (5-10).
 * Resultado: la mayoría de afectados logran curarse. Lo más notable de esta configuración es que no llega a colapsarse el sistema sanitario. Por otro lado, la mortalidad se estima en un 2-3% lo que se ajusta bastante a los datos de España a mes de mayo. A veces, en la simulación se pueden dar varios brotes de infección, debido a la coincidencia de algún individuo infectado con otro que no lleve las medidas de protección adecuadas
 
-
+#### Modificación del escenario realista 
+* Setup: Mantenemos todas las características de la simulación realista con la excepción del aforo. Él cual aumentamos ligeramente. 
+* Resultado: observamos una mayor letalidad y mortalidad en la población. Esto es debido a que aumenta drásticamente la probabilidad de que entre en el supermercado alguien contagiado. 
 
 
 ## EXTENDING THE MODEL
@@ -1300,8 +1302,24 @@ https://www.abc.es/sociedad/abci-mueren-mas-mayores-coronavirus-porque-siempre-m
 
 * Gestión de la carga vírica: la carga vírica es un atributo de las personas y de los objetos de las estanterías. Las personas pueden ve incrementada su carga vírica al inhalar partículas infecciosas o al tocar objetos contagiados. Igualmente, una persona con carga vírica puede estornudar y propagar estas partículas infecciosas o tocar un objeto y contagiarlo. La carga vírica determina si la persona se infecta y a la hora de estornudar, la cantidad de partículas que exuplsa.
 
+* El movimiento del agente se ha realizado con una maquina de estados, cabe destacar que la espera en cola se ha agregado posteriormente, por lo que los ultimos dos estados no estan ordenados por orden de ejecución.
+	* Estado 0: Esperando fuera. Si la lista de la compra > 0 -> Estado 1.
+	* Estado 1: moviendose arriba hasta el primer pasillo. Si esta en el pasillo -> Estado 2.
+	* Estado 2: movimiento por la tienda de forma aleatorio (con restricciones para que no parezca un movimiento de abejas) y elección de productos a comprar. Si ha terminado de rellenar la lista de la compra -> Estado 3.
+	* Estado 3: movimiento hasta el pasillo inferior y seleccion del dependiente. Una vez realizadas esas dos tareas -> Estado 4.
+	* Estado 4: movimiento hacia el pasillo del dependiente. Cuando lo alcanza -> Estado 5.
+	* Estado 5: movimiento hacia el dependiente (si hay alguien delante, espera). Una ves que ha alcanzado al dependiente -> Estado 9.
+	* Estado 6: el agente acaba de pagar y empieza a bajar hacia la pasillo de salida. Una vez que lo alcanze -> Estado 7.
+	* Estado 7: movimiento hacia la puerta de salida. Cuando la alcanze -> Estado 8
+	* Estado 8: salida de la tienda. El estado se resetea a 0.
+	* Estado 9: el agente espera a que el dependiente compruebe todos los productos para pagar. Cabe destacar que este proceso dura 5 productos por tick (siendo esto en la vida real aproximadamente 5 min). Una vez que termine -> Estado 10.
+	* Estado 10: El dependiente ha terminado de comprobar los productos y el agente paga  -> Estado 6.
 
+* Para el movimiento de particulas se ha considerado un estornudo clasico en el que las particulas estan orientadas hacia delante y van decayendo con el tiempo hacia abajo. Con velocidades y tamaños aleatorios.
 
+* Para el modelo del viento, se ha considerado el modelo del Lidl o Aldi que en vez de echar corrientes de aire en cada pasillo en una direccion concreta, echan de forma uniforme el aire desde el techo hacia el suelo. Por ello, el viento de base esta en 1 (condiciones normales) y, si lo vamos reduciendo, las particulas no iran tan rapido hacia el suelo y tendran un tiempo de vida mayor.
+
+* Para el ancho de pasillo se han considerado dos casos, en el primero es el pasillo estandar, donde dos personas pueden pasar algo apretadas. Y en el otro caso, tenemos los pasillos mas anchos, ofreciendo un mejor movimiento a las personas. Como en la practica es muy raro apreciar a mas de dos personas en la misma parcela, se ha aplicado esta caracteristica a la vida de las particulas. Permitiendo asi una mayor vida en el segundo caso, ya que el viento no estara tan concentrado como en el primero.
 
 ## CREDITS AND REFERENCES
 
@@ -1311,6 +1329,9 @@ https://www.abc.es/sociedad/abci-mueren-mas-mayores-coronavirus-porque-siempre-m
 https://www.riojasalud.es/rrhh-files/rrhh/proteccion-respiratoria-rev-3175.pdf
 https://www.urgenciasyemergen.com/coronavirus-mascarillas-y-evidencia-cientifica/
 https://cdn.statcdn.com/Infographic/images/normal/21772.jpeg
+https://www.lavanguardia.com/vida/20200324/4874346984/hombres-mas-vulnerables-mujeres-danos-coronavirus.html
+https://www.abc.es/sociedad/abci-mueren-mas-mayores-coronavirus-porque-siempre-mueren-mas-ancianos-202004070156_noticia.html
+https://www.riojasalud.es/rrhh-files/rrhh/proteccion-respiratoria-rev-3175.pdf
 @#$#@#$#@
 default
 true
