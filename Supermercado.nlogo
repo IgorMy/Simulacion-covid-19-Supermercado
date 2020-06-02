@@ -753,10 +753,10 @@ NIL
 1
 
 SLIDER
-11
-417
-183
-450
+14
+419
+186
+452
 wind
 wind
 0
@@ -768,15 +768,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-341
-181
-374
+12
+343
+184
+376
 maxTiempo
 maxTiempo
 5
 15
-10.0
+15.0
 1
 1
 NIL
@@ -791,7 +791,7 @@ Aforo
 Aforo
 0
 50
-20.0
+10.0
 1
 1
 NIL
@@ -821,7 +821,7 @@ SLIDER
 %_de_guantes
 0
 100
-48.0
+95.0
 1
 1
 NIL
@@ -836,7 +836,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-43.0
+100.0
 1
 1
 NIL
@@ -860,10 +860,10 @@ NIL
 1
 
 SLIDER
-10
-377
-182
-410
+13
+379
+185
+412
 num-particles
 num-particles
 5
@@ -890,10 +890,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-199
-604
-286
-661
+197
+602
+284
+659
 Infectados
 infectados-total
 17
@@ -901,10 +901,10 @@ infectados-total
 14
 
 MONITOR
-183
-667
-269
-724
+181
+665
+267
+722
 % Infectados
 infectados-total / población * 100
 2
@@ -912,10 +912,10 @@ infectados-total / población * 100
 14
 
 SLIDER
-11
-458
-183
-491
+14
+460
+186
+493
 Camillas-UCI
 Camillas-UCI
 1
@@ -927,10 +927,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-289
-604
-346
-661
+287
+602
+344
+659
 UCI
 UCI-total
 0
@@ -938,10 +938,10 @@ UCI-total
 14
 
 MONITOR
-351
-603
-429
-660
+349
+601
+427
+658
 Fallecidos
 muertos-total
 1
@@ -949,10 +949,10 @@ muertos-total
 14
 
 MONITOR
-434
-604
-506
-661
+432
+602
+504
+659
 Curados
 curados-total
 1
@@ -960,10 +960,10 @@ curados-total
 14
 
 MONITOR
-274
-667
-333
-724
+272
+665
+331
+722
 % UCI
 UCI-total / afectados * 100
 2
@@ -971,10 +971,10 @@ UCI-total / afectados * 100
 14
 
 MONITOR
-338
-666
-420
-723
+336
+664
+418
+721
 Letalidad %
 muertos-total / afectados * 100
 2
@@ -982,10 +982,10 @@ muertos-total / afectados * 100
 14
 
 MONITOR
-423
-667
-506
-724
+421
+665
+504
+722
 % Curados
 curados-total / afectados * 100
 2
@@ -993,10 +993,10 @@ curados-total / afectados * 100
 14
 
 PLOT
-519
-602
-1001
-847
+517
+600
+999
+845
 Gráfica acumulada
 Ticks
 Personas
@@ -1015,10 +1015,10 @@ PENS
 "Colapso Sistema" 1.0 0 -5825686 true "" "plot Camillas-UCI"
 
 MONITOR
-383
-731
-506
-788
+381
+729
+504
+786
 Mortalidad %
 count personas with [muerto = true] / población * 100
 2
@@ -1026,10 +1026,10 @@ count personas with [muerto = true] / población * 100
 14
 
 PLOT
-1006
-602
-1465
-847
+1004
+600
+1463
+845
 Gráfica diaria
 Días
 Personas
@@ -1047,10 +1047,10 @@ PENS
 "Fallecidos" 1.0 1 -16777216 true "" ""
 
 MONITOR
-1473
-604
-1548
-653
+1471
+602
+1546
+651
 Día Actual
 dia
 0
@@ -1058,10 +1058,10 @@ dia
 12
 
 MONITOR
-297
-732
-379
-789
+295
+730
+377
+787
 Afectados
 afectados
 0
@@ -1076,10 +1076,10 @@ OUTPUT
 11
 
 SLIDER
-11
-500
-183
-533
+14
+502
+186
+535
 ancho-pasillo
 ancho-pasillo
 1
@@ -1091,10 +1091,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-13
-538
-185
-571
+16
+540
+188
+573
 numero-productos
 numero-productos
 3
@@ -1106,10 +1106,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-158
-732
-290
-781
+156
+730
+288
+779
 Afectados actuales
 count personas with [tcarga-virica > 0]
 2
@@ -1124,13 +1124,13 @@ CHOOSER
 tipo_mascarilla
 tipo_mascarilla
 "Quirurjica" "FFP1" "FFP2" "FFP3"
-2
+1
 
 SLIDER
-7
-307
-179
-340
+10
+309
+182
+342
 mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
@@ -1206,8 +1206,10 @@ Para ejecutar correctamente la simulación, se deben establecer los parametros d
 * Setup: Un aforo máximo de personas, sin mascarilla ni guantes, con una lista de la compra con muchos productos.
 * Resultado: Los infectados se disparan los primeros días, y a partir del séptimo día, cuando los síntomas aparecen, la UCI se colapsa (línea morada en la gráfica), haciendo que personas ajenas a esta enfermedad tampoco puedan ser atendidas.
 
+#### Caso Mejor
+* Setup: Aforo reducido de personas en el supermercado (10-20), todas llevando mascarilllas FFP que protegen de las partículas inhaladas (y puestas de forma correcta), así como guantes para no contaminar los productos manipulados. Además con una lista de la compra reducida con tal de minimizar el tiempo en el supermercado.
+* Resultado: los casos apenas varían a los infectados inicialmente, teniendo estos una incidencia mínima sobre el resto de la población, ya que gracias a las mascarillas FFP y los guantes, resulta muy poco probable ser contagiado.
 
-	
 
 ## EXTENDING THE MODEL
 
