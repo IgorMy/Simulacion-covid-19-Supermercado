@@ -891,10 +891,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-197
-602
-284
-659
+143
+603
+238
+660
 Infectados
 infectados-total
 17
@@ -902,10 +902,10 @@ infectados-total
 14
 
 MONITOR
-181
-665
-267
-722
+143
+666
+239
+723
 % Infectados
 infectados-total / población * 100
 2
@@ -928,10 +928,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-287
-602
-344
-659
+245
+603
+303
+660
 UCI
 UCI-total
 0
@@ -939,10 +939,10 @@ UCI-total
 14
 
 MONITOR
-349
-601
-427
-658
+308
+603
+392
+660
 Fallecidos
 muertos-total
 1
@@ -950,10 +950,10 @@ muertos-total
 14
 
 MONITOR
-432
-602
-504
-659
+399
+603
+481
+660
 Curados
 curados-total
 1
@@ -961,10 +961,10 @@ curados-total
 14
 
 MONITOR
-272
-665
-331
-722
+245
+666
+304
+723
 % UCI
 UCI-total / afectados * 100
 2
@@ -972,10 +972,10 @@ UCI-total / afectados * 100
 14
 
 MONITOR
-336
-664
-418
-721
+310
+666
+392
+723
 Letalidad %
 muertos-total / afectados * 100
 2
@@ -983,10 +983,10 @@ muertos-total / afectados * 100
 14
 
 MONITOR
-421
-665
-504
-722
+398
+666
+481
+723
 % Curados
 curados-total / afectados * 100
 2
@@ -994,10 +994,10 @@ curados-total / afectados * 100
 14
 
 PLOT
-517
-600
-999
-845
+487
+603
+913
+848
 Gráfica acumulada
 Ticks
 Personas
@@ -1016,10 +1016,10 @@ PENS
 "Colapso Sistema" 1.0 0 -5825686 true "" "plot Camillas-UCI"
 
 MONITOR
-381
-729
-504
-786
+211
+731
+308
+788
 Mortalidad %
 count personas with [muerto = true] / población * 100
 2
@@ -1027,10 +1027,10 @@ count personas with [muerto = true] / población * 100
 14
 
 PLOT
-1004
-600
-1463
-845
+918
+603
+1292
+848
 Gráfica diaria
 Días
 Personas
@@ -1048,21 +1048,21 @@ PENS
 "Fallecidos" 1.0 1 -16777216 true "" ""
 
 MONITOR
-1471
-602
-1546
-651
+346
+755
+450
+828
 Día Actual
 dia
 0
 1
-12
+18
 
 MONITOR
-295
-730
-377
-787
+130
+731
+203
+788
 Afectados
 afectados
 0
@@ -1070,10 +1070,10 @@ afectados
 14
 
 OUTPUT
-1311
-12
-1775
-599
+1300
+10
+1764
+848
 11
 
 SLIDER
@@ -1107,15 +1107,15 @@ NIL
 HORIZONTAL
 
 MONITOR
-156
-730
-288
-779
+0
+731
+124
+788
 Afectados actuales
 count personas with [tcarga-virica > 0]
 2
 1
-12
+14
 
 CHOOSER
 1
@@ -1143,26 +1143,26 @@ mascarilla_mal_colocada
 HORIZONTAL
 
 MONITOR
-38
-673
-176
-718
+0
+666
+138
+723
  UCI a los 15 dias
 UCI-hasta-los-15-dias
 17
 1
-11
+14
 
 MONITOR
-54
-609
-183
-654
+0
+603
+138
+660
 Muertos a los 21 dias
 Muertos-hasta-los-21-dias
 17
 1
-11
+14
 
 @#$#@#$#@
 ## WHAT IS IT?
