@@ -75,7 +75,6 @@ to setup
   set UCI-hasta-los-15-dias 0
   set Muertos-hasta-los-21-dias 0
 
-  set infectados-total 0
   set muertos-total 0
   set curados-total 0
   set UCI-total 0
@@ -128,6 +127,8 @@ to setup
   ask n-of floor(población * %contagio_inicial / 100) personas with [color != 16 ][set tcarga-virica 10 cambiar-label-color]
   ask n-of floor(población * %_de_guantes / 100) personas with [guantes = false ][set guantes true cambiar-label-color]
   ask n-of floor(población * %_de_mascarillas / 100) personas with [mascarilla = false ][set mascarilla true cambiar-label-color]
+
+  set infectados-total count personas with [tcarga-virica > 0]
 
 end
 
@@ -262,8 +263,8 @@ to apply-forces
     let step-x vel-x * step-size * 0.1
     let step-y (vel-y - wind) * step-size * 0.1
     let extra 1
-    if ancho-pasillo = 2 [set extra extra + random-float 0.2]
-    if vida = floor(maxTiempo * extra) [die]
+    if ancho-pasillo = 2 [set extra extra + random-float 0.2] ; tamaño del pasillo
+    if vida = floor(maxTiempo * extra / wind) [die]
     let new-x xcor + step-x
     let new-y ycor + step-y
     if esMuro = true [ ; Entra en contacto con el muro
@@ -709,9 +710,9 @@ to dibujar-graficas
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-197
+181
 10
-1308
+1292
 598
 -1
 -1
@@ -736,10 +737,10 @@ ticks
 800.0
 
 BUTTON
-25
-14
-88
-47
+17
+10
+80
+43
 NIL
 setup
 NIL
@@ -753,10 +754,10 @@ NIL
 1
 
 SLIDER
-14
-419
-186
-452
+0
+432
+172
+465
 wind
 wind
 0
@@ -768,10 +769,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-12
-343
-184
-376
+0
+351
+172
+384
 maxTiempo
 maxTiempo
 5
@@ -783,25 +784,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-7
-148
-179
-181
+0
+133
+172
+166
 Aforo
 Aforo
 0
 50
-20.0
+16.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-8
-66
-180
-99
+0
+51
+172
+84
 población
 población
 50
@@ -813,10 +814,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-188
-181
-221
+0
+174
+172
+207
 %_de_guantes
 %_de_guantes
 0
@@ -828,25 +829,25 @@ NIL
 HORIZONTAL
 
 SLIDER
-9
-225
-181
-258
+0
+217
+172
+250
 %_de_mascarillas
 %_de_mascarillas
 0
 100
-80.0
+72.0
 1
 1
 NIL
 HORIZONTAL
 
 BUTTON
-97
-14
-160
-47
+89
+10
+152
+43
 NIL
 go\n
 T
@@ -860,10 +861,10 @@ NIL
 1
 
 SLIDER
-13
-379
-185
-412
+0
+392
+172
+425
 num-particles
 num-particles
 5
@@ -875,10 +876,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-8
-105
-180
-138
+1
+92
+173
+125
 %contagio_inicial
 %contagio_inicial
 1
@@ -912,10 +913,10 @@ infectados-total / población * 100
 14
 
 SLIDER
-14
-460
-186
-493
+0
+473
+172
+506
 Camillas-UCI
 Camillas-UCI
 1
@@ -1076,10 +1077,10 @@ OUTPUT
 11
 
 SLIDER
-14
-502
-186
-535
+0
+514
+172
+547
 ancho-pasillo
 ancho-pasillo
 1
@@ -1091,15 +1092,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-16
-540
-188
-573
+0
+556
+172
+589
 numero-productos
 numero-productos
 3
 15
-6.0
+10.0
 1
 1
 NIL
@@ -1117,20 +1118,20 @@ count personas with [tcarga-virica > 0]
 12
 
 CHOOSER
-11
-261
-179
-306
+1
+258
+172
+303
 tipo_mascarilla
 tipo_mascarilla
 "Quirurjica" "FFP1" "FFP2" "FFP3"
 0
 
 SLIDER
-10
-309
-182
-342
+0
+311
+172
+344
 mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
@@ -1142,10 +1143,10 @@ mascarilla_mal_colocada
 HORIZONTAL
 
 MONITOR
-40
-614
-178
-659
+38
+673
+176
+718
  UCI a los 15 dias
 UCI-hasta-los-15-dias
 17
@@ -1153,10 +1154,10 @@ UCI-hasta-los-15-dias
 11
 
 MONITOR
-49
-667
-178
-712
+54
+609
+183
+654
 Muertos a los 21 dias
 Muertos-hasta-los-21-dias
 17
