@@ -22,6 +22,7 @@ globals[
   afectados
   dia
   ticks-dia
+
 ]
 
 ; propiedades de los muros
@@ -213,9 +214,9 @@ to go
     ]
   ]
 
-  ; Personas sin mascarilla, expulsan particulas por esturnudo cada 5 ticks y 50% probabilidad
+  ; Personas sin mascarilla, expulsan particulas por esturnudo cada 5 ticks
   let personas-dentro count personas with [xcor < 29 and mascarilla = false and tcarga-virica > 0]
-  ask n-of (random personas-dentro) personas with [xcor < 29 and mascarilla = false and tcarga-virica > 0] [if ticks mod 5 = 0 and 50 < random 100 [estornuda]]
+  ask n-of (random personas-dentro) personas with [xcor < 29 and mascarilla = false and tcarga-virica > 0] [if ticks mod 5 = 0 [estornuda]]
 
   ; Movimiento de particulas
   compute-forces
@@ -274,25 +275,29 @@ end
 ; estornudo del agente
 
 to estornuda
-  if tcarga-virica > 0 [ ; Solucion de mierda
+  if tcarga-virica > 0 [
     set ha-estornudado 10
     let direccion heading
-    hatch-particulas num-particles * tcarga-virica / 10 [
-      ;show direccion
-      let acel-x 20
-      let acel-y 30
-      ;Particula dirigida hacia donde mira la persona que estornuda
-      if direccion = 0 [set vel-x random 15 - 7  set vel-y (random-float 1) * acel-y]
-      if direccion = 90 [set vel-x (random-float 1) * acel-x  set vel-y random 15 - 7]
-      if direccion = 270 [set vel-x random 15 - 7 set vel-y (random-float 1 - 1) * acel-y]
-      if direccion = -90 [set vel-x (random-float 1 - 1) * acel-x set vel-y random 15 - 7]
+    let efectividad 0
+    if mascarilla = true [set efectividad mascarilla_mal_colocada] ; Probabilidad de colocarse mal la mascarilla y que sea inefectiva
+    if efectividad > random 100 [
+      hatch-particulas num-particles * tcarga-virica / 10 [
+        ;show direccion
+        let acel-x 20
+        let acel-y 30
+        ;Particula dirigida hacia donde mira la persona que estornuda
+        if direccion = 0 [set vel-x random 15 - 7  set vel-y (random-float 1) * acel-y]
+        if direccion = 90 [set vel-x (random-float 1) * acel-x  set vel-y random 15 - 7]
+        if direccion = 270 [set vel-x random 15 - 7 set vel-y (random-float 1 - 1) * acel-y]
+        if direccion = -90 [set vel-x (random-float 1 - 1) * acel-x set vel-y random 15 - 7]
 
-      ;set vel-y 10 - (random-float 20) ; velocidad y inicial
-      set vida 0
-      set shape "circle"
-      set size random-float 0.3
-      set color red
-      set label ""
+        ;set vel-y 10 - (random-float 20) ; velocidad y inicial
+        set vida 0
+        set shape "circle"
+        set size random-float 0.3
+        set color red
+        set label ""
+      ]
     ]
   ]
 end
@@ -749,10 +754,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-10
-312
-182
-345
+9
+341
+181
+374
 maxTiempo
 maxTiempo
 5
@@ -794,15 +799,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-13
-401
-185
-434
+12
+418
+184
+451
 %_de_contagio
 %_de_contagio
 0
 100
-31.0
+32.0
 1
 1
 NIL
@@ -832,7 +837,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-100.0
+95.0
 1
 1
 NIL
@@ -856,10 +861,10 @@ NIL
 1
 
 SLIDER
-11
-360
-183
-393
+10
+377
+182
+410
 num-particles
 num-particles
 5
@@ -879,17 +884,17 @@ SLIDER
 %contagio_inicial
 1
 100
-5.0
+10.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-8
-265
-184
-298
+1483
+666
+1659
+699
 prob_contagio_mascarilla
 prob_contagio_mascarilla
 0
@@ -1138,6 +1143,31 @@ ticks / 300
 1
 13
 
+CHOOSER
+11
+261
+179
+306
+tipo_mascarilla
+tipo_mascarilla
+"Quirurjica" "FFP1" "FFP2" "FFP3"
+0
+
+SLIDER
+7
+307
+179
+340
+mascarilla_mal_colocada
+mascarilla_mal_colocada
+0
+100
+25.0
+1
+1
+%
+HORIZONTAL
+
 @#$#@#$#@
 ## WHAT IS IT?
 
@@ -1170,7 +1200,17 @@ Para ejecutar correctamente la simulación, se deben establecer los parametros d
 
 ## THINGS TO TRY
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
+#### Modelos de simulación propuestos
+
+* Caso Peor: Un aforo máximo de personas, sin mascarilla ni guantes
+
+#### Tipos de mascarilla (prob_contagio_mascarilla)
+
+* Quirúrgicas: son las más comunes y usadas entre los ciudadanos. Se ha demostrado que no son eficaces para evitar el contagio si hay partículas en el aire, pero ayudan a retener y no propagar estas partículas al toser o estornudar.
+* FFP1 (filtro  de  partículas  tipo  P1):  tienen  una  eficacia  de  filtración  mínima  del  78%.  Suelen emplearse frente a partículas de material inerte, y no se recomiendan para uso médico.
+* FFP2 (filtro  de  partículas  tipo  P2):  tienen  una  eficacia  de  filtración  mínima  del  92%. Se utilizan frente a aerosoles de baja o moderada toxicidad
+* FFP3 (filtro  de  partículas  tipo  P3):  tienen  una  eficacia  de  filtración  mínima  del  98%. Se utilizan frente a aerosoles de alta toxicidad.
+	
 
 ## EXTENDING THE MODEL
 
