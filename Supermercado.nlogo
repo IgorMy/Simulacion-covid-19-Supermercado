@@ -735,7 +735,7 @@ GRAPHICS-WINDOW
 598
 -1
 -1
-27.58
+27.24
 1
 10
 1
@@ -1013,9 +1013,9 @@ curados-total / afectados * 100
 14
 
 PLOT
-487
+787
 603
-913
+1266
 848
 Gráfica acumulada
 Ticks
@@ -1046,9 +1046,9 @@ count personas with [muerto = true] / población * 100
 14
 
 PLOT
-918
+1273
 603
-1292
+1764
 848
 Gráfica diaria
 Días
@@ -1067,10 +1067,10 @@ PENS
 "Fallecidos" 1.0 1 -16777216 true "" ""
 
 MONITOR
-346
-755
-450
-828
+590
+674
+694
+747
 Día Actual
 dia
 0
@@ -1092,7 +1092,7 @@ OUTPUT
 1300
 10
 1764
-848
+599
 11
 
 SLIDER
@@ -1184,9 +1184,9 @@ Muertos-hasta-los-21-dias
 14
 
 MONITOR
-2
+0
 794
-133
+104
 843
 Fallecidos (0, 50]
 muertos-50
@@ -1195,10 +1195,10 @@ muertos-50
 12
 
 MONITOR
-4
-846
-132
-895
+110
+794
+222
+843
 Fallecidos (50, 60]
 muertos-5060
 17
@@ -1206,10 +1206,10 @@ muertos-5060
 12
 
 MONITOR
-4
-900
-132
-949
+227
+794
+338
+843
 Fallecidos (60, 70]
 muertos-6070
 17
@@ -1217,10 +1217,10 @@ muertos-6070
 12
 
 MONITOR
-5
-954
-133
-1003
+342
+794
+455
+843
 Fallecidos (70, 80]
 muertos-7080
 17
@@ -1228,10 +1228,10 @@ muertos-7080
 12
 
 MONITOR
-6
-1007
-133
-1056
+460
+794
+568
+843
 Fallecidos (80, +]
 muertos-80
 17
