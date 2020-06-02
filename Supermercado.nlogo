@@ -330,20 +330,6 @@ to estornuda
 
 end
 
-; ------------------------------------------------------------------------------------------------------------------------------------------------------
-; respiración del agente
-
-to respira
-  hatch-particulas num-particles * 0.05 * tcarga-virica [
-    set vel-x 10 - (random-float 20) ; velocidad x inicial
-    set vel-y 5 - (random-float 10) ; velocidad y inicial
-    set vida 0
-    set color red
-    set shape "square"
-    set size 0.4
-    set label ""
-  ]
-end
 
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
 ; movimiento de los agentes
@@ -731,8 +717,8 @@ end
 GRAPHICS-WINDOW
 181
 10
-1292
-598
+1278
+591
 -1
 -1
 27.24
@@ -1299,7 +1285,23 @@ Para ejecutar correctamente la simulación, se deben establecer los parametros d
 
 ## NETLOGO FEATURES
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+* Gestión del tiempo: se ha estimado la duración de un día en 300 ticks, de forma que se pueda ralentizar el tiempo y apreciar el movimiento de los agentes. 
+
+* Lista de la compra: El tiempo de estancia de la persona en el supermercado, viene determinado por el número máximo de productos que va a adquirir (regulable entre 3 y 15 mediante un slider).
+
+* Efectividad de la mascarilla: existen 4 tipos de mascarillas (1 quirúrjica que ayuda a contener el estornudo y que no se disperse, pero no protege de partículas en suspensión y 3 de tipo FFP con distinta efectividad, que a diferencia de las anteriores, protegen de las partículas al respirar). Igualmente, un factor muy importante y que resaltan los medios de información, es colocarse la mascarilla bien. No sirve de nada tener una mascarilla FFP3 si está mal colocada. Por este motivo, hemos añadido un slider que permite ajustar la probabilidad que tiene una persona de colocarse la mascarilla de forma ineficaz. Este ajuste se puede usar también para representar que, aunque las personas llevan guantes, si tocan el móvil o se llevan las manos a la cara, se pueden contagiar igualemente.
+Fuente: https://www.riojasalud.es/rrhh-files/rrhh/proteccion-respiratoria-rev-3175.pdf
+
+* Gestión de las camas de la UCI: hemos añadido un slider que permite ajustar la capacidad de camas de la UCI, de forma que si no hubiera camas de UCI para un paciente grave, no se le podría atender, aumentando la probabilidad de morir (especialmente en personas de avanzada edad). Esta situación representaría el colapso del sistema sanitario, que es uno de los escenarios más peligrosos. (Se puede visualizar en la gráfica acumulada como una línea morada).
+
+* Diferencia entre hombres y mujeres: varios estudios afirman que los hombres tienen menos probabilidad de contagiarse, pero afrontan la enfermedad peor, presentando así una mayor letalidad, y las mujeres al contrario. Hemos reflejado esto en las probabilidades que se aplican al recuperarse de la enfermedad o morir. 
+Fuentes: https://www.lavanguardia.com/vida/20200324/4874346984/hombres-mas-vulnerables-mujeres-danos-coronavirus.html
+https://www.abc.es/sociedad/abci-mueren-mas-mayores-coronavirus-porque-siempre-mueren-mas-ancianos-202004070156_noticia.html
+
+* Gestión de la carga vírica: la carga vírica es un atributo de las personas y de los objetos de las estanterías. Las personas pueden ve incrementada su carga vírica al inhalar partículas infecciosas o al tocar objetos contagiados. Igualmente, una persona con carga vírica puede estornudar y propagar estas partículas infecciosas o tocar un objeto y contagiarlo. La carga vírica determina si la persona se infecta y a la hora de estornudar, la cantidad de partículas que exuplsa.
+
+
+
 
 ## CREDITS AND REFERENCES
 
