@@ -24,6 +24,11 @@ globals[
   ticks-dia
   UCI-hasta-los-15-dias
   Muertos-hasta-los-21-dias
+  muertos-50
+  muertos-5060
+  muertos-6070
+  muertos-7080
+  muertos-80
 ]
 
 ; propiedades de los muros
@@ -79,6 +84,12 @@ to setup
   set curados-total 0
   set UCI-total 0
   set afectados 0
+  set muertos-50 0
+  set muertos-5060 0
+  set muertos-6070 0
+  set muertos-7080 0
+  set muertos-80 0
+
 
   ; dibujado de paredes
   ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
@@ -675,6 +686,13 @@ to Muere
   set label ""
   set estado 0
   set posicion-objetivo 0
+
+  ; Añadir a las estadisticas
+  if edad >= 80 [set muertos-80 muertos-80 + 1]
+  if edad >= 70 and edad < 80 [set muertos-7080 muertos-7080 + 1]
+  if edad > 60 and edad <= 70 [set muertos-6070 muertos-6070 + 1]
+  if edad > 50 and edad <= 60 [set muertos-5060 muertos-5060 + 1]
+  if edad <= 50 [set muertos-50 muertos-50 + 1]
 end
 
 to Sana
@@ -705,6 +723,15 @@ to dibujar-graficas
     plotxy ticks / ticks-dia  muertos-hoy
     set-current-plot-pen "Curados"
     plotxy ticks / ticks-dia  curados-hoy
+
+    set-current-plot "Fallecidos por edad"
+    set-current-plot-pen "Personas"
+    plotxy 45  muertos-50
+    plotxy 55  muertos-5060
+    plotxy 65  muertos-6070
+    plotxy 75  muertos-7080
+    plotxy 85  muertos-80
+
   ]
 
 end
@@ -807,7 +834,7 @@ población
 población
 50
 500
-500.0
+499.0
 1
 1
 NIL
@@ -884,7 +911,7 @@ SLIDER
 %contagio_inicial
 1
 100
-5.0
+16.0
 1
 1
 NIL
@@ -1163,6 +1190,61 @@ Muertos-hasta-los-21-dias
 17
 1
 14
+
+MONITOR
+2
+794
+133
+843
+Fallecidos (0, 50]
+muertos-50
+0
+1
+12
+
+MONITOR
+4
+846
+132
+895
+Fallecidos (50, 60]
+muertos-5060
+17
+1
+12
+
+MONITOR
+4
+900
+132
+949
+Fallecidos (60, 70]
+muertos-6070
+17
+1
+12
+
+MONITOR
+5
+954
+133
+1003
+Fallecidos (70, 80]
+muertos-7080
+17
+1
+12
+
+MONITOR
+6
+1007
+133
+1056
+Fallecidos (80, +]
+muertos-80
+17
+1
+12
 
 @#$#@#$#@
 ## WHAT IS IT?
