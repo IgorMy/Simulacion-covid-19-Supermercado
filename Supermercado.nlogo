@@ -724,14 +724,6 @@ to dibujar-graficas
     set-current-plot-pen "Curados"
     plotxy ticks / ticks-dia  curados-hoy
 
-    set-current-plot "Fallecidos por edad"
-    set-current-plot-pen "Personas"
-    plotxy 45  muertos-50
-    plotxy 55  muertos-5060
-    plotxy 65  muertos-6070
-    plotxy 75  muertos-7080
-    plotxy 85  muertos-80
-
   ]
 
 end
