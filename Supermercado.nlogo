@@ -2,8 +2,6 @@
 particulas-own[
   vel-x ; Velocidad eje X
   vel-y ; Velocidad eje Y
-  force-x ; Fuerza eje X
-  force-y ; Fuerza eje X
   vida
 ]
 
@@ -265,17 +263,13 @@ end
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
 ; particulas
 
-to apply-gravity
-  set force-y force-y - wind
-end
-
 to apply-forces
  ask particulas[
     let step-x vel-x * step-size * 0.1
-    let step-y (vel-y - wind) * step-size * 0.1
+    let step-y (vel-y + Ventilación) * step-size * 0.1 ; Efecto de la ventilación
     let extra 1
     if ancho-pasillo = 2 [set extra extra + random-float 0.2] ; tamaño del pasillo
-    if vida = floor(maxTiempo * extra / wind) [die]
+    if vida >= floor(maxTiempo * extra) [die]
     let new-x xcor + step-x
     let new-y ycor + step-y
     if esMuro = true [ ; Entra en contacto con el muro
@@ -293,10 +287,7 @@ end
 to compute-forces
   let control 0
   ask particulas[
-    set force-x 0
-    set force-y 0
-    apply-gravity
-    set vida vida + 1
+    set vida vida + 1 - 0.01 * Ventilación ; Viento ayuda a dispersar las particulas más tiempo
   ]
 
 end
@@ -763,12 +754,12 @@ SLIDER
 432
 172
 465
-wind
-wind
+Ventilación
+Ventilación
 0
+50
+42.0
 1
-1.0
-0.1
 1
 NIL
 HORIZONTAL
@@ -782,7 +773,7 @@ maxTiempo
 maxTiempo
 5
 15
-15.0
+12.0
 1
 1
 NIL
@@ -797,7 +788,7 @@ Aforo
 Aforo
 0
 50
-16.0
+25.0
 1
 1
 NIL
@@ -812,7 +803,7 @@ población
 población
 50
 500
-499.0
+500.0
 1
 1
 NIL
@@ -827,7 +818,7 @@ SLIDER
 %_de_guantes
 0
 100
-90.0
+87.0
 1
 1
 NIL
@@ -842,7 +833,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-72.0
+94.0
 1
 1
 NIL
@@ -874,7 +865,7 @@ num-particles
 num-particles
 5
 10
-6.0
+7.0
 1
 1
 NIL
@@ -889,7 +880,7 @@ SLIDER
 %contagio_inicial
 1
 100
-16.0
+5.0
 1
 1
 NIL
@@ -1090,7 +1081,7 @@ ancho-pasillo
 ancho-pasillo
 1
 2
-2.0
+1.0
 1
 1
 NIL
@@ -1244,7 +1235,7 @@ Modelo de un supermercado generico en el contexto de la crisis desatada por la p
 * maxTiempo: define el timepo maximo de vida de una particula.
 * num-particulas: el numero maximo de particulas que echara un agente al estornudar.
 * % de contagio: controla la posibilidad de que un agente respire cerca de una particula.
-* wind: establece la fuerza del viendo que empuja las particulas hacia el suelo.
+* Ventilación: establece la fuerza del sistema de ventilación del supermercado, que empuja las particulas hacia desde la entrada hacia arriba.
 * Camillas-UCI: establece el numero máximo de personas en un hospital, en UCI.
 * ancho-pasillo: considerando como 1 un pasillo basico donde la salida del aire esta mas concentrada, reducira el tiempo de vida de las particulas. Siendo 2 un pasillo mas ancho con el aire un poco mas distribuido.
 * numero-productos: establece el numero maximo de productos que puede comprar el cliente, controlado de esta forma el timepo que pasara en el supermercado.
@@ -1320,6 +1311,8 @@ https://www.abc.es/sociedad/abci-mueren-mas-mayores-coronavirus-porque-siempre-m
 * Para el modelo del viento, se ha considerado el modelo del Lidl o Aldi que en vez de echar corrientes de aire en cada pasillo en una dirección concreta, echan de forma uniforme el aire desde el techo hacia el suelo. Por ello, el viento de base esta en valor 1 (condiciones normales) y, si lo vamos reduciendo, las particulas no irán tan rápido hacia el suelo y tendrán un tiempo de vida mayor.
 
 * Para el ancho de pasillo se han considerado dos casos, en el primero es el pasillo estándar, donde dos personas pueden pasar algo apretadas. Y en el otro caso, tenemos los pasillos mas anchos, ofreciendo un mejor movimiento a las personas. Como en la práctica es muy raro apreciar a más de dos personas en la misma parcela, se ha aplicado esta característica a la vida de las partículas,`permitiendo así una mayor vida en el segundo caso, ya que el viento no estará tan concentrado como en el primero.
+
+* Gestión de la ventilación del supermercado: mediante el slider "ventilación" se puede regular la fuerza del sistema de ventilación, que desplaza las partículas de la entrada hacia arriba, añadiendo una componente constante en el cálculo de la velocidad de la partícula en el eje Y y aumentando la duración de la partícula.
 
 ## CREDITS AND REFERENCES
 
