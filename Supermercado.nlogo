@@ -209,12 +209,15 @@ to go
     set aforo-actual aforo-actual + 1
   ]
 
-  ; Contagio por contacto con particula en aire. 100% si no lleva mascarilla, proba_contagio_mascarilla% si lleva. Marcar a infectado si no lo está
+  ; Contagio por contacto con particula en aire. Marcar a infectado si no lo está
   let efectividad 0 ;
   if tipo_mascarilla = "Quirurjica" [set efectividad 10]
   if tipo_mascarilla = "FFP1" [set efectividad 78]
   if tipo_mascarilla = "FFP2" [set efectividad 92]
   if tipo_mascarilla = "FFP3" [set efectividad 98]
+
+  ; Tener la mascarilla mal colocada es como no llevarla
+  if mascarilla_mal_colocada > random 100 [set efectividad efectividad / 10]
 
 
   ask personas with [
@@ -758,7 +761,7 @@ Ventilación
 Ventilación
 0
 50
-42.0
+25.0
 1
 1
 NIL
@@ -788,7 +791,7 @@ Aforo
 Aforo
 0
 50
-25.0
+20.0
 1
 1
 NIL
@@ -833,7 +836,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-94.0
+100.0
 1
 1
 NIL
@@ -880,7 +883,7 @@ SLIDER
 %contagio_inicial
 1
 100
-5.0
+38.0
 1
 1
 NIL
@@ -1132,7 +1135,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-25.0
+5.0
 1
 1
 %
