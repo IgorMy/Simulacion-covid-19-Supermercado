@@ -45,14 +45,14 @@ turtles-own[
   infectado
   edad
   genero
+  mascarilla
+  guantes
+  ha-estornudado
 ]
 
 ; propiedades de las personas
 personas-own[
-  guantes
-  mascarilla
   movimiento
-  ha-estornudado
   posicion-objetivo
   estado
   lista-de-la-compra
@@ -109,7 +109,21 @@ to setup
 
   ; Dependientes y su espacio de trabajo
   ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
-  crt 5 [set breed dependientes set shape "person" set ycor 4 set color green set xcor 7 + who * 4]
+  create-dependientes 5 [
+    set shape "person"
+    set ycor 4
+    set color 87
+    set xcor 7 + who * 4
+    set mascarilla mascarillas-dependientes
+    set guantes true
+    set label-color black
+    cambiar-label-color
+    set muerto false
+    set UCI false
+    set curado false
+    set heading -90
+    set ha-estornudado 0
+  ]
 
   ; Generación de personas
   create-personas población [
@@ -121,7 +135,6 @@ to setup
     move-to one-of patches with [pcolor = 116]
     set guantes false
     set mascarilla false
-    set label tcarga-virica
     set ha-estornudado 0
     set edad 18 + random 61
     set infectado false
@@ -130,6 +143,7 @@ to setup
     set curado false
     set dias 0
     ifelse random 2 = 0 [set genero "M"][set genero "F"]
+    set label tcarga-virica
   ]
 
   ; Se establecen los enfermos y se reparten tanto los guantes como las mascarillas
@@ -190,7 +204,7 @@ to go
   ]
 
   ; Comprobación extra por si acaso no se ha coloreado algun enfermo
-  ask personas with [tcarga-virica > 0 and color != 16 ] [cambiar-label-color] ; colorear a  los enfermos
+  ask turtles with [tcarga-virica > 0 and color != 16 and breed != particulas ] [cambiar-label-color] ; colorear a  los enfermos
 
   ; Colorear muros segun carga virica
   ask patches with [esMuro = true and member? pcarga-virica (range 1 5)] [set pcolor 19]
@@ -220,8 +234,8 @@ to go
   if mascarilla_mal_colocada > random 100 [set efectividad efectividad / 10]
 
 
-  ask personas with [
-    xcor < 29 and ((mascarilla = true and efectividad < random 100) or mascarilla = false) and ha-estornudado = 0 and not curado
+  ask turtles with [
+    breed != particulas and xcor < 29 and ((mascarilla = true and efectividad < random 100) or mascarilla = false) and ha-estornudado = 0 and not curado
   ] [
 
     let hay-particula 0
@@ -245,8 +259,8 @@ to go
 
   ; Personas sin mascarilla, expulsan particulas por esturnudo cada 5 ticks
   if ticks mod 5 = 0[
-    let personas-dentro count personas with [xcor < 29 and tcarga-virica > 0]
-    ask n-of (random personas-dentro) personas with [xcor < 29 and tcarga-virica > 0] [estornuda]
+    let personas-dentro count turtles with [xcor < 29 and tcarga-virica > 0 and breed != particulas]
+    ask n-of (random personas-dentro) turtles with [xcor < 29 and tcarga-virica > 0 and breed != particulas] [estornuda]
   ]
 
   ; Movimiento de particulas
@@ -579,7 +593,7 @@ end
 to pasa-un-dia
 
   set dia dia + 1
-  ask personas with [tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
+  ask personas with [breed != particulas and tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
     set dias dias + 1
 
     ifelse genero = "M" [
@@ -760,8 +774,8 @@ SLIDER
 Ventilación
 Ventilación
 0
-50
-25.0
+15
+8.0
 1
 1
 NIL
@@ -791,7 +805,7 @@ Aforo
 Aforo
 0
 50
-20.0
+5.0
 1
 1
 NIL
@@ -821,7 +835,7 @@ SLIDER
 %_de_guantes
 0
 100
-87.0
+93.0
 1
 1
 NIL
@@ -836,7 +850,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-100.0
+30.0
 1
 1
 NIL
@@ -891,9 +905,9 @@ HORIZONTAL
 
 MONITOR
 143
-603
+629
 238
-660
+686
 Infectados
 infectados-total
 17
@@ -902,9 +916,9 @@ infectados-total
 
 MONITOR
 143
-666
+692
 239
-723
+749
 % Infectados
 infectados-total / población * 100
 2
@@ -928,9 +942,9 @@ HORIZONTAL
 
 MONITOR
 245
-603
+629
 303
-660
+686
 UCI
 UCI-total
 0
@@ -939,9 +953,9 @@ UCI-total
 
 MONITOR
 308
-603
+629
 392
-660
+686
 Fallecidos
 muertos-total
 1
@@ -950,9 +964,9 @@ muertos-total
 
 MONITOR
 399
-603
+629
 481
-660
+686
 Curados
 curados-total
 1
@@ -961,9 +975,9 @@ curados-total
 
 MONITOR
 245
-666
+692
 304
-723
+749
 % UCI
 UCI-total / afectados * 100
 2
@@ -972,9 +986,9 @@ UCI-total / afectados * 100
 
 MONITOR
 310
-666
+692
 392
-723
+749
 Letalidad %
 muertos-total / afectados * 100
 2
@@ -983,9 +997,9 @@ muertos-total / afectados * 100
 
 MONITOR
 398
-666
+692
 481
-723
+749
 % Curados
 curados-total / afectados * 100
 2
@@ -1016,9 +1030,9 @@ PENS
 
 MONITOR
 211
-731
+757
 308
-788
+814
 Mortalidad %
 count personas with [muerto = true] / población * 100
 2
@@ -1048,9 +1062,9 @@ PENS
 
 MONITOR
 590
-674
+700
 694
-747
+773
 Día Actual
 dia
 0
@@ -1059,9 +1073,9 @@ dia
 
 MONITOR
 130
-731
+757
 203
-788
+814
 Afectados
 afectados
 0
@@ -1107,9 +1121,9 @@ HORIZONTAL
 
 MONITOR
 0
-731
+757
 124
-788
+814
 Afectados actuales
 count personas with [tcarga-virica > 0]
 2
@@ -1143,9 +1157,9 @@ HORIZONTAL
 
 MONITOR
 0
-666
+692
 138
-723
+749
  UCI a los 15 dias
 UCI-hasta-los-15-dias
 17
@@ -1154,9 +1168,9 @@ UCI-hasta-los-15-dias
 
 MONITOR
 0
-603
+629
 138
-660
+686
 Muertos a los 21 dias
 Muertos-hasta-los-21-dias
 17
@@ -1165,9 +1179,9 @@ Muertos-hasta-los-21-dias
 
 MONITOR
 0
-794
+820
 104
-843
+869
 Fallecidos (0, 50]
 muertos-50
 0
@@ -1176,9 +1190,9 @@ muertos-50
 
 MONITOR
 110
-794
+820
 222
-843
+869
 Fallecidos (50, 60]
 muertos-5060
 17
@@ -1187,9 +1201,9 @@ muertos-5060
 
 MONITOR
 227
-794
+820
 338
-843
+869
 Fallecidos (60, 70]
 muertos-6070
 17
@@ -1198,9 +1212,9 @@ muertos-6070
 
 MONITOR
 342
-794
+820
 455
-843
+869
 Fallecidos (70, 80]
 muertos-7080
 17
@@ -1209,14 +1223,25 @@ muertos-7080
 
 MONITOR
 460
-794
+820
 568
-843
+869
 Fallecidos (80, +]
 muertos-80
 17
 1
 12
+
+SWITCH
+2
+592
+173
+625
+mascarillas-dependientes
+mascarillas-dependientes
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
