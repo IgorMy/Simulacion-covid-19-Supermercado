@@ -157,11 +157,9 @@ to setup
   ]
 
   ; Se establecen los enfermos y se reparten tanto los guantes como las mascarillas
-  ask n-of floor(población * %contagio_inicial / 100) personas with [color != 16 ][set tcarga-virica limite-infectado + 1 cambiar-label-color]
+  ask n-of floor(población * %contagio_inicial / 100) personas with [color != 16 ][set tcarga-virica 1 cambiar-label-color]
   ask n-of floor(población * %_de_guantes / 100) personas with [guantes = false ][set guantes true cambiar-label-color]
   ask n-of floor(población * %_de_mascarillas / 100) personas with [mascarilla = false ][set mascarilla true cambiar-label-color]
-
-  ;set infectados-total count personas with [tcarga-virica > limite-infectado]
 
 end
 
@@ -263,14 +261,16 @@ to go
         ask one-of personas with [
           xcor > 29 and not UCI and not muerto
         ][
-          ifelse horas = hora-cierre - 1[
-            set lista-de-la-compra 3; si queda media hora para el cierre, solo se permite entrar con la lista de la compra minima
-          ][
-            set lista-de-la-compra 3 + random (numero-productos - 2)
+          if tcarga-virica < 4 or random 100 > 50[ ; antes de darse los sintomas fuertes, necesarios para ir a la uci, la persona en cuestion tendra sintomas leves en función de la carga virica. Se lo pensara dos veces antes de ir al super.
+            ifelse horas = hora-cierre - 1[
+              set lista-de-la-compra 3; si queda media hora para el cierre, solo se permite entrar con la lista de la compra minima
+            ][
+              set lista-de-la-compra 3 + random (numero-productos - 2)
+            ]
+            set espera lista-de-la-compra
           ]
-          set espera lista-de-la-compra
+          set aforo-actual aforo-actual + 1
         ]
-        set aforo-actual aforo-actual + 1
       ]
     ]
 
@@ -299,7 +299,7 @@ to go
         ]
 
         if hay-particula = 1[ ;se pone este random por la probabilidad de respirar la particula
-          set tcarga-virica tcarga-virica + num-particulas
+          set tcarga-virica tcarga-virica + 1
           cambiar-label-color
           if infectado = false and tcarga-virica > limite-infectado [
             set infectado true set infectados-hoy infectados-hoy + 1
@@ -676,7 +676,7 @@ to pasa-un-dia
     ifelse genero = "M" [
 
       ; Muerte o Curado ;
-      if dias = 15 [
+      if dias = 15[
         ifelse (edad >= 80 and (22 > random 161 or (not UCI and 70 > random 100))) or
         (edad >= 70 and edad < 80 and (14 > random 161 or (not UCI and 60 > random 100))) or
         (edad > 60 and edad <= 70 and 5 > random 161) or
@@ -685,7 +685,7 @@ to pasa-un-dia
       ]
 
       ; UCI ;
-      if dias = 7 and not UCI [
+      if dias = 7 and not UCI  [
         if ((edad > 80 and 5 > random 172) or
           (edad > 60 and edad <= 80 and 30 > random 172) or
           (edad > 50 and edad <= 60 and 20 > random 172) or
@@ -867,7 +867,7 @@ maxTiempo
 maxTiempo
 5
 15
-15.0
+10.0
 1
 1
 NIL
@@ -912,7 +912,7 @@ SLIDER
 %_de_guantes
 0
 100
-100.0
+90.0
 1
 1
 NIL
@@ -959,7 +959,7 @@ num-particles
 num-particles
 5
 10
-6.0
+7.0
 1
 1
 NIL
@@ -1084,10 +1084,31 @@ curados-total / afectados * 100
 14
 
 PLOT
-848
-603
-1305
-847
+821
+876
+1277
+1119
+Gráfica acumulada (Actualización diaria)
+Día
+Personas
+0.0
+60.0
+0.0
+500.0
+true
+true
+"" ""
+PENS
+"Infectados" 1.0 0 -2674135 true "" "plotxy dia infectados-total"
+"Curados" 1.0 0 -13840069 true "" "plotxy dia curados-total"
+"UCI" 1.0 0 -955883 true "" "plotxy dia UCI-total"
+"Fallecidos" 1.0 0 -16777216 true "" "plotxy dia muertos-total"
+
+PLOT
+818
+628
+1275
+872
 Gráfica en directo
 Ticks
 Personas
@@ -1099,7 +1120,7 @@ true
 true
 "" ""
 PENS
-"Infectados" 1.0 0 -2674135 true "" "plot count personas with [tcarga-virica > limite-infectado]"
+"Infectados" 1.0 0 -2674135 true "" "plot count personas with [tcarga-virica > 0]"
 "Curados" 1.0 0 -13840069 true "" "plot count personas with [curado = true]"
 "UCI" 1.0 0 -955883 true "" "plot count personas with [UCI = true]"
 "Fallecidos" 1.0 0 -16777216 true "" "plot count personas with [muerto = true]"
@@ -1117,10 +1138,10 @@ count personas with [muerto = true] / población * 100
 14
 
 PLOT
-1309
-604
-1765
-848
+1278
+629
+1769
+874
 Gráfica diaria
 Días
 Personas
@@ -1175,7 +1196,7 @@ ancho-pasillo
 ancho-pasillo
 1
 2
-1.0
+2.0
 1
 1
 NIL
@@ -1226,7 +1247,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-25.0
+17.0
 1
 1
 %
