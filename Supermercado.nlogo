@@ -158,8 +158,6 @@ to setup
   ask n-of floor(población * %_de_guantes / 100) personas with [guantes = false ][set guantes true cambiar-label-color]
   ask n-of floor(población * %_de_mascarillas / 100) personas with [mascarilla = false ][set mascarilla true cambiar-label-color]
 
-  set infectados-total count personas with [tcarga-virica > 0]
-
 end
 
 ; ------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1076,11 +1074,32 @@ curados-total / afectados * 100
 14
 
 PLOT
-787
-603
-1266
-848
-Gráfica acumulada
+821
+876
+1277
+1119
+Gráfica acumulada (Actualización diaria)
+Día
+Personas
+0.0
+60.0
+0.0
+500.0
+true
+true
+"" ""
+PENS
+"Infectados" 1.0 0 -2674135 true "" "plotxy dia infectados-total"
+"Curados" 1.0 0 -13840069 true "" "plotxy dia curados-total"
+"UCI" 1.0 0 -955883 true "" "plotxy dia UCI-total"
+"Fallecidos" 1.0 0 -16777216 true "" "plotxy dia muertos-total"
+
+PLOT
+818
+628
+1275
+872
+Gráfica en directo
 Ticks
 Personas
 0.0
@@ -1091,7 +1110,7 @@ true
 true
 "" ""
 PENS
-"Infectados" 1.0 0 -2674135 true "" "plot count personas with [tcarga-virica > 0 and UCI != true]"
+"Infectados" 1.0 0 -2674135 true "" "plot count personas with [tcarga-virica > 0]"
 "Curados" 1.0 0 -13840069 true "" "plot count personas with [curado = true]"
 "UCI" 1.0 0 -955883 true "" "plot count personas with [UCI = true]"
 "Fallecidos" 1.0 0 -16777216 true "" "plot count personas with [muerto = true]"
@@ -1109,10 +1128,10 @@ count personas with [muerto = true] / población * 100
 14
 
 PLOT
-1273
-603
-1764
-848
+1278
+629
+1769
+874
 Gráfica diaria
 Días
 Personas
@@ -1218,7 +1237,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-15.0
+17.0
 1
 1
 %
