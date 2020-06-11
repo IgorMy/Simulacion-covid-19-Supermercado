@@ -27,6 +27,9 @@ globals[
   muertos-6070
   muertos-7080
   muertos-80
+  ; Gestión tiempo
+  horas
+  minutos
 ]
 
 ; propiedades de los muros
@@ -72,8 +75,6 @@ to setup
   ; Configuraciones basicas del mundo
   ca ; Limpiar la pantalla
   reset-ticks ; se ponen los tick a 0
-  set ticks-dia 300 ; Duracion de un dia en ticks
-  set dia 1 ; Contador dias
   set step-size 0.07 ; movimiento de las particulas
   set aforo-actual 0
   set UCI-hasta-los-15-dias 0
@@ -89,6 +90,11 @@ to setup
   set muertos-7080 0
   set muertos-80 0
 
+  ; Tiempo
+  set ticks-dia 4320 ; Duracion de un dia en ticks
+  set horas 0
+  set minutos 0
+  set dia 1 ; Contador dias
 
   ; dibujado de paredes
   ask patches [if pxcor >= 0 and pycor >= 0 and pxcor <= 29 and pycor <= max-pycor [set pcolor black] ] ; paredes
@@ -173,107 +179,128 @@ end
 ; metodo go
 
 to go
-  ; parar la simulación al final del dia 60
-  if ticks = ticks-dia * 60 [ stop ]
+  ; HACER DURANTE SUPERMERCADO CERRADO
+  ; CONSIDERAR SI CIERRA EL DOMINGO
+  ifelse horas >= hora-cierre or horas < hora-apertura or (cierra-domingo and dia mod 7 = 0) [
+    ; Gestión tiempo
+    if ticks mod 3 = 0 [set minutos minutos + 1]
+    if minutos = 60 [set horas horas + 1 set minutos 0]
 
-  ; HACER DIARIAMENTE
-  if ticks mod ticks-dia = 0 [
-    ; Se desinfecta el supermercado
-    ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0]
-    ask particulas [die]
+    ; HACER DIARIAMENTE
+    if ticks mod ticks-dia = 0 and ticks > 0 [
+      ; Se desinfecta el supermercado
+      ask patches with [esMuro = true] [set pcolor blue set pcarga-virica 0]
+      ask particulas [die]
 
-    ; comprobación de los infectados
-    pasa-un-dia
+      ; comprobación de los infectados
+      pasa-un-dia
 
-    ; dibujo de graficas
-    dibujar-graficas
+      ; dibujo de graficas
+      dibujar-graficas
 
-    if ticks / ticks-dia < 15 [
-      set UCI-hasta-los-15-dias UCI-hasta-los-15-dias + UCI-hoy
-      set Muertos-hasta-los-21-dias Muertos-hasta-los-21-dias + muertos-hoy
-    ]
-    ; Reiniciamos los casos diarios
-    set infectados-hoy 0
-    set curados-hoy 0
-    set muertos-hoy 0
-    set UCI-hoy 0
-
-    ; Actualizamos estadisticas afectados totales
-    set afectados count personas with[tcarga-virica > 0 or UCI or muerto or curado]
-
-  ]
-
-  ; Comprobación extra por si acaso no se ha coloreado algun enfermo
-  ask turtles with [tcarga-virica > 0 and color != 16 and breed != particulas ] [cambiar-label-color] ; colorear a  los enfermos
-
-  ; Colorear muros segun carga virica
-  ask patches with [esMuro = true and member? pcarga-virica (range 1 5)] [set pcolor 19]
-  ask patches with [esMuro = true and member? pcarga-virica (range 6 10)] [set pcolor 18]
-  ask patches with [esMuro = true and member? pcarga-virica (range 11 15)] [set pcolor 17]
-  ask patches with [esMuro = true and member? pcarga-virica (range 16 20)] [set pcolor 16]
-  ask patches with [esMuro = true and member? pcarga-virica (range 21 25)] [set pcolor 15]
-  ask patches with [esMuro = true and pcarga-virica > 25] [set pcolor 14]
-
-  ; Reestablecer color de los objetos coloreados
-  if ticks mod 2 = 0 [ask patches with [pcolor = blue + 1] [set pcolor blue]]
-
-  ; metemos a la gente dentro de la tienda
-  if aforo-actual < aforo and random 100 > 50 [
-    ask one-of personas with [ xcor > 29 and not UCI and not muerto ][set lista-de-la-compra 3 + random (numero-productos - 2) set espera lista-de-la-compra]
-    set aforo-actual aforo-actual + 1
-  ]
-
-  ; Contagio por contacto con particula en aire. Marcar a infectado si no lo está
-  let efectividad 0 ;
-  if tipo_mascarilla = "Quirurjica" or tipo_mascarilla = true [set efectividad 10]
-  if tipo_mascarilla = "FFP1" [set efectividad 78]
-  if tipo_mascarilla = "FFP2" [set efectividad 92]
-  if tipo_mascarilla = "FFP3" [set efectividad 98]
-
-  ; Tener la mascarilla mal colocada es como no llevarla
-  if mascarilla_mal_colocada > random 100 [set efectividad efectividad / 10]
-
-
-  ask turtles with [
-    breed != particulas and xcor < 29 and ((mascarilla = true and efectividad < random 100) or mascarilla = false) and ha-estornudado = 0 and not curado
-  ] [
-
-    let hay-particula 0
-    let probabilidad-genero 0
-    ifelse genero = "M" [set probabilidad-genero random 100][set probabilidad-genero random 130]
-    if probabilidad-genero > 30 [ ; menor probabilidad de contagio en hombres
-      ask particulas in-cone 1 180 [
-        set hay-particula 1 die
+      if ticks / ticks-dia < 15 [
+        set UCI-hasta-los-15-dias UCI-hasta-los-15-dias + UCI-hoy
+        set Muertos-hasta-los-21-dias Muertos-hasta-los-21-dias + muertos-hoy
       ]
+      ; Reiniciamos los casos diarios
+      set infectados-hoy 0
+      set curados-hoy 0
+      set muertos-hoy 0
+      set UCI-hoy 0
 
-      if hay-particula = 1 [
-        set tcarga-virica tcarga-virica + 1
-        cambiar-label-color
-        if infectado = false [
-          set infectado true set infectados-hoy infectados-hoy + 1
-          output-show "se infecta con partícula en el aire"
+      ; Actualizamos estadisticas afectados totales
+      set afectados count personas with[tcarga-virica > 0 or UCI or muerto or curado]
+
+    ]
+
+    tick
+  ]; HACER DURANTE SUPERMERCADO ABIERTO
+  [
+    ; parar la simulación al final del dia 60
+    if ticks = ticks-dia * 60 [ stop ]
+
+    ; Gestión tiempo
+    if ticks mod 3 = 0 [set minutos minutos + 1]
+    if minutos = 60 [set horas horas + 1 set minutos 0]
+    ; Desalojar el supermercado en la ultima media hora
+    ;ifelse horas = hora-cierre - 1 and minutos = 30 [ask personas [with xcor < 29] []]
+
+
+
+
+    ; Comprobación extra por si acaso no se ha coloreado algun enfermo
+    ask turtles with [tcarga-virica > 0 and color != 16 and breed != particulas ] [cambiar-label-color] ; colorear a  los enfermos
+
+    ; Colorear muros segun carga virica
+    ask patches with [esMuro = true and member? pcarga-virica (range 1 5)] [set pcolor 19]
+    ask patches with [esMuro = true and member? pcarga-virica (range 6 10)] [set pcolor 18]
+    ask patches with [esMuro = true and member? pcarga-virica (range 11 15)] [set pcolor 17]
+    ask patches with [esMuro = true and member? pcarga-virica (range 16 20)] [set pcolor 16]
+    ask patches with [esMuro = true and member? pcarga-virica (range 21 25)] [set pcolor 15]
+    ask patches with [esMuro = true and pcarga-virica > 25] [set pcolor 14]
+
+    ; Reestablecer color de los objetos coloreados
+    if ticks mod 2 = 0 [ask patches with [pcolor = blue + 1] [set pcolor blue]]
+
+    ; metemos a la gente dentro de la tienda
+    if aforo-actual < aforo and random 100 > 50 [
+      ask one-of personas with [ xcor > 29 and not UCI and not muerto ][set lista-de-la-compra 3 + random (numero-productos - 2) set espera lista-de-la-compra]
+      set aforo-actual aforo-actual + 1
+    ]
+
+    ; Contagio por contacto con particula en aire. Marcar a infectado si no lo está
+    let efectividad 0 ;
+    if tipo_mascarilla = "Quirurjica" or tipo_mascarilla = true [set efectividad 10]
+    if tipo_mascarilla = "FFP1" [set efectividad 78]
+    if tipo_mascarilla = "FFP2" [set efectividad 92]
+    if tipo_mascarilla = "FFP3" [set efectividad 98]
+
+    ; Tener la mascarilla mal colocada es como no llevarla
+    if mascarilla_mal_colocada > random 100 [set efectividad efectividad / 10]
+
+
+    ask turtles with [
+      breed != particulas and xcor < 29 and ((mascarilla = true and efectividad < random 100) or mascarilla = false) and ha-estornudado = 0 and not curado
+    ] [
+
+      let hay-particula 0
+      let probabilidad-genero 0
+      ifelse genero = "M" [set probabilidad-genero random 100][set probabilidad-genero random 130]
+      if probabilidad-genero > 30 [ ; menor probabilidad de contagio en hombres
+        ask particulas in-cone 1 180 [
+          set hay-particula 1 die
+        ]
+
+        if hay-particula = 1 [
+          set tcarga-virica tcarga-virica + 1
+          cambiar-label-color
+          if infectado = false [
+            set infectado true set infectados-hoy infectados-hoy + 1
+            output-show "se infecta con partícula en el aire"
+          ]
         ]
       ]
     ]
+
+    ; Personas sin mascarilla, expulsan particulas por esturnudo cada 5 ticks
+    if ticks mod 5 = 0[
+      let personas-dentro count turtles with [xcor < 29 and tcarga-virica > 0 and breed != particulas]
+      ask n-of (random personas-dentro) turtles with [xcor < 29 and tcarga-virica > 0 and breed != particulas] [estornuda]
+    ]
+
+    ; Movimiento de particulas
+    compute-forces
+    apply-forces
+
+    ; Movimiento del agente
+    movimiento-agente
+
+    ; reducción del tiempo de contaminación tras un estornudo
+    ask personas with [ha-estornudado > 0][set ha-estornudado ha-estornudado - 1]
+
+
+    tick
   ]
-
-  ; Personas sin mascarilla, expulsan particulas por esturnudo cada 5 ticks
-  if ticks mod 5 = 0[
-    let personas-dentro count turtles with [xcor < 29 and tcarga-virica > 0 and breed != particulas]
-    ask n-of (random personas-dentro) turtles with [xcor < 29 and tcarga-virica > 0 and breed != particulas] [estornuda]
-  ]
-
-  ; Movimiento de particulas
-  compute-forces
-  apply-forces
-
-  ; Movimiento del agente
-  movimiento-agente
-
-  ; reducción del tiempo de contaminación tras un estornudo
-  ask personas with [ha-estornudado > 0][set ha-estornudado ha-estornudado - 1]
-
-  tick
 end
 
 
@@ -597,7 +624,8 @@ end
 ; Comprobación de los agentes enfermos
 
 to pasa-un-dia
-
+  set horas 0
+  set minutos 0
   set dia dia + 1
   ask personas with [breed != particulas and tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
     set dias dias + 1
@@ -781,7 +809,7 @@ Ventilación
 Ventilación
 0
 15
-7.0
+4.0
 1
 1
 NIL
@@ -811,7 +839,7 @@ Aforo
 Aforo
 0
 50
-5.0
+30.0
 1
 1
 NIL
@@ -841,7 +869,7 @@ SLIDER
 %_de_guantes
 0
 100
-93.0
+100.0
 1
 1
 NIL
@@ -856,7 +884,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-30.0
+85.0
 1
 1
 NIL
@@ -903,7 +931,7 @@ SLIDER
 %contagio_inicial
 1
 100
-38.0
+45.0
 1
 1
 NIL
@@ -1067,15 +1095,15 @@ PENS
 "Fallecidos" 1.0 1 -16777216 true "" ""
 
 MONITOR
-590
-700
-694
-773
-Día Actual
-dia
+490
+625
+563
+682
+Día
+ifelse-value dia mod 7 = 1[\"Lunes\"]\n [ifelse-value dia mod 7 = 2[\"Martes\"]\n  [ifelse-value dia mod 7 = 3[\"Miércoles\"]\n   [ifelse-value dia mod 7 = 4[\"Jueves\"]\n    [ifelse-value dia mod 7 = 5[\"Viernes\"]\n     [ifelse-value dia mod 7 = 6[\"Sábado\"]\n      [ifelse-value dia mod 7 = 0[\"Domingo\"][\"\"]]]]]]]
 0
 1
-18
+14
 
 MONITOR
 130
@@ -1155,7 +1183,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-5.0
+19.0
 1
 1
 %
@@ -1245,7 +1273,73 @@ SWITCH
 625
 mascarillas-dependientes
 mascarillas-dependientes
+0
 1
+-1000
+
+MONITOR
+627
+624
+684
+681
+Horas
+horas
+0
+1
+14
+
+MONITOR
+685
+624
+755
+681
+Minutos
+minutos
+2
+1
+14
+
+INPUTBOX
+547
+693
+625
+753
+hora-apertura
+9.0
+1
+0
+Number
+
+INPUTBOX
+626
+693
+704
+753
+hora-cierre
+12.0
+1
+0
+Number
+
+MONITOR
+567
+624
+624
+681
+Día
+dia
+17
+1
+14
+
+SWITCH
+562
+757
+690
+790
+Cierra-domingo
+Cierra-domingo
+0
 1
 -1000
 
