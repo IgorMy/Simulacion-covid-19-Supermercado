@@ -258,15 +258,15 @@ to go
         ask one-of personas with [
           xcor > 29 and not UCI and not muerto
         ][
-          if tcarga-virica < 4 or random 100 > 50[ ; antes de darse los sintomas fuertes, necesarios para ir a la uci, la persona en cuestion tendra sintomas leves en función de la carga virica. Se lo pensara dos veces antes de ir al super.
+          if tcarga-virica < 4 or random 100 > 30[ ; antes de darse los sintomas fuertes, necesarios para ir a la uci, la persona en cuestion tendra sintomas leves en función de la carga virica. Se lo pensara dos veces antes de ir al super.
             ifelse horas = hora-cierre - 1[
               set lista-de-la-compra 3; si queda media hora para el cierre, solo se permite entrar con la lista de la compra minima
             ][
               set lista-de-la-compra 3 + random (numero-productos - 2)
             ]
             set espera lista-de-la-compra
+            set aforo-actual aforo-actual + 1
           ]
-          set aforo-actual aforo-actual + 1
         ]
       ]
     ]
@@ -872,7 +872,7 @@ Aforo
 Aforo
 0
 50
-20.0
+15.0
 1
 1
 NIL
@@ -902,7 +902,7 @@ SLIDER
 %_de_guantes
 0
 100
-90.0
+94.0
 1
 1
 NIL
@@ -1001,7 +1001,7 @@ Camillas-UCI
 Camillas-UCI
 1
 50
-25.0
+10.0
 1
 1
 NIL
@@ -1237,7 +1237,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-17.0
+10.0
 1
 1
 %
@@ -1327,7 +1327,7 @@ SWITCH
 625
 mascarillas-dependientes
 mascarillas-dependientes
-0
+1
 1
 -1000
 
@@ -1475,7 +1475,7 @@ Fuente: https://www.riojasalud.es/rrhh-files/rrhh/proteccion-respiratoria-rev-31
 Fuentes: https://www.lavanguardia.com/vida/20200324/4874346984/hombres-mas-vulnerables-mujeres-danos-coronavirus.html
 https://www.abc.es/sociedad/abci-mueren-mas-mayores-coronavirus-porque-siempre-mueren-mas-ancianos-202004070156_noticia.html
 
-* Gestión de la carga vírica: la carga vírica es un atributo de las personas y de los objetos de las estanterías. Las personas pueden ve incrementada su carga vírica al inhalar partículas infecciosas o al tocar objetos contagiados. Igualmente, una persona con carga vírica puede estornudar y propagar estas partículas infecciosas o tocar un objeto y contagiarlo. La carga vírica determina si la persona se infecta y a la hora de estornudar, la cantidad de partículas que exuplsa.
+* Gestión de la carga vírica: la carga vírica es un atributo de las personas y de los objetos de las estanterías. Las personas pueden ve incrementada su carga vírica al inhalar partículas infecciosas o al tocar objetos contagiados. Igualmente, una persona con carga vírica puede estornudar y propagar estas partículas infecciosas o tocar un objeto y contagiarlo. La carga vírica determina si la persona se infecta y a la hora de estornudar, la cantidad de partículas que exuplsa. Las personas con carga vírica mayor o igual a cuatro empiezan a tener síntomas leves en cuyo caso, se piensan dos veces si ir o no al supermercado.
 
 * El movimiento del agente se ha realizado con una máquina de estados, cabe mencionar que la espera en cola se ha agregado posteriormente, por lo que los últimos dos estados no estan ordenados por orden de ejecución.
 	* Estado 0: Esperando fuera. Si la lista de la compra > 0 -> Estado 1.
