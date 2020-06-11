@@ -182,6 +182,14 @@ to go
   ; HACER DURANTE SUPERMERCADO CERRADO
   ; CONSIDERAR SI CIERRA EL DOMINGO
   ifelse horas >= hora-cierre or horas < hora-apertura or (cierra-domingo and dia mod 7 = 0) [
+    ask personas with [xcor < 29][
+      set posicion-objetivo 0
+      set estado 0
+      move-to one-of patches with [pcolor = 116]
+      set aforo-actual aforo-actual - 1
+      set lista-de-la-compra 0
+    ]
+
     ; Gestión tiempo
     if ticks mod 3 = 0 [set minutos minutos + 1]
     if minutos = 60 [set horas horas + 1 set minutos 0]
@@ -242,10 +250,23 @@ to go
     ; Reestablecer color de los objetos coloreados
     if ticks mod 2 = 0 [ask patches with [pcolor = blue + 1] [set pcolor blue]]
 
-    ; metemos a la gente dentro de la tienda
-    if aforo-actual < aforo and random 100 > 50 [
-      ask one-of personas with [ xcor > 29 and not UCI and not muerto ][set lista-de-la-compra 3 + random (numero-productos - 2) set espera lista-de-la-compra]
-      set aforo-actual aforo-actual + 1
+   ifelse horas > hora-cierre - 2 and minutos > 29[
+      ask personas with [xcor < 29 and lista-de-la-compra > 0][set lista-de-la-compra 0]
+    ][
+      ; metemos a la gente dentro de la tienda
+      if aforo-actual < aforo and random 100 > 50 [
+        ask one-of personas with [
+          xcor > 29 and not UCI and not muerto
+        ][
+          ifelse horas = hora-cierre - 1[
+            set lista-de-la-compra 3; si queda media hora para el cierre, solo se permite entrar con la lista de la compra minima
+          ][
+            set lista-de-la-compra 3 + random (numero-productos - 2)
+          ]
+          set espera lista-de-la-compra
+        ]
+        set aforo-actual aforo-actual + 1
+      ]
     ]
 
     ; Contagio por contacto con particula en aire. Marcar a infectado si no lo está
@@ -781,7 +802,7 @@ GRAPHICS-WINDOW
 0
 1
 ticks
-800.0
+500.0
 
 BUTTON
 17
