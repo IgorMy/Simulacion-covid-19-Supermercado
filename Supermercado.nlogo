@@ -154,7 +154,7 @@ to setup
   ]
 
   ; Se establecen los enfermos y se reparten tanto los guantes como las mascarillas
-  ask n-of floor(población * %contagio_inicial / 100) personas with [color != 16 ][set tcarga-virica 10 cambiar-label-color]
+  ask n-of floor(población * %contagio_inicial / 100) personas with [color != 16 ][set tcarga-virica 1 cambiar-label-color]
   ask n-of floor(población * %_de_guantes / 100) personas with [guantes = false ][set guantes true cambiar-label-color]
   ask n-of floor(población * %_de_mascarillas / 100) personas with [mascarilla = false ][set mascarilla true cambiar-label-color]
 
@@ -260,14 +260,16 @@ to go
         ask one-of personas with [
           xcor > 29 and not UCI and not muerto
         ][
-          ifelse horas = hora-cierre - 1[
-            set lista-de-la-compra 3; si queda media hora para el cierre, solo se permite entrar con la lista de la compra minima
-          ][
-            set lista-de-la-compra 3 + random (numero-productos - 2)
+          if tcarga-virica < 4 or random 100 > 50[ ; antes de darse los sintomas fuertes, necesarios para ir a la uci, la persona en cuestion tendra sintomas leves en función de la carga virica. Se lo pensara dos veces antes de ir al super.
+            ifelse horas = hora-cierre - 1[
+              set lista-de-la-compra 3; si queda media hora para el cierre, solo se permite entrar con la lista de la compra minima
+            ][
+              set lista-de-la-compra 3 + random (numero-productos - 2)
+            ]
+            set espera lista-de-la-compra
           ]
-          set espera lista-de-la-compra
+          set aforo-actual aforo-actual + 1
         ]
-        set aforo-actual aforo-actual + 1
       ]
     ]
 
@@ -294,7 +296,7 @@ to go
           set hay-particula 1 die
         ]
 
-        if hay-particula = 1 and random 100 > 70[ ;se pone este random por la probabilidad de respirar la particula
+        if hay-particula = 1[ ;se pone este random por la probabilidad de respirar la particula
           set tcarga-virica tcarga-virica + 1
           cambiar-label-color
           if infectado = false [
@@ -666,7 +668,7 @@ to pasa-un-dia
     ifelse genero = "M" [
 
       ; Muerte o Curado ;
-      if dias = 15 [
+      if dias = 15[
         ifelse (edad >= 80 and (22 > random 161 or (not UCI and 70 > random 100))) or
         (edad >= 70 and edad < 80 and (14 > random 161 or (not UCI and 60 > random 100))) or
         (edad > 60 and edad <= 70 and 5 > random 161) or
@@ -675,7 +677,7 @@ to pasa-un-dia
       ]
 
       ; UCI ;
-      if dias = 7 and not UCI [
+      if dias = 7 and not UCI  [
         if ((edad > 80 and 5 > random 172) or
           (edad > 60 and edad <= 80 and 30 > random 172) or
           (edad > 50 and edad <= 60 and 20 > random 172) or
@@ -857,7 +859,7 @@ maxTiempo
 maxTiempo
 5
 15
-12.0
+10.0
 1
 1
 NIL
@@ -872,7 +874,7 @@ Aforo
 Aforo
 0
 50
-15.0
+20.0
 1
 1
 NIL
@@ -902,7 +904,7 @@ SLIDER
 %_de_guantes
 0
 100
-100.0
+90.0
 1
 1
 NIL
@@ -949,7 +951,7 @@ num-particles
 num-particles
 5
 10
-6.0
+7.0
 1
 1
 NIL
@@ -1165,7 +1167,7 @@ ancho-pasillo
 ancho-pasillo
 1
 2
-1.0
+2.0
 1
 1
 NIL
@@ -1216,7 +1218,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-25.0
+15.0
 1
 1
 %
