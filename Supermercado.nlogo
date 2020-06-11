@@ -295,7 +295,9 @@ to go
         ]
 
         if hay-particula = 1[ ;se pone este random por la probabilidad de respirar la particula
-          set tcarga-virica tcarga-virica + 1
+          if tcarga-virica < 10 [
+            set tcarga-virica tcarga-virica + 1
+          ]
           cambiar-label-color
           if infectado = false [
             set infectado true set infectados-hoy infectados-hoy + 1
@@ -513,7 +515,11 @@ to mirar-objetos-cercanos
 
     ; Contagiar/se objeto en estanteria al tocarlo sin guantes
     if tcarga-virica > random 20 and (guantes = false or mascarilla = false) and not curado [ask patch x y [set pcarga-virica pcarga-virica + 1]  output-show (word "infecta el objeto " x "-" y)]
-    if guantes = false and muro-infectado and not curado [set tcarga-virica tcarga-virica + 1 cambiar-label-color if infectado = false [set infectado true set infectados-hoy infectados-hoy + 1 output-show (word "se infecta al tocar el objeto " x "-" y)]]
+    if guantes = false and muro-infectado and not curado [
+      if tcarga-virica < 10 [
+            set tcarga-virica tcarga-virica + 1
+          ]
+      cambiar-label-color if infectado = false [set infectado true set infectados-hoy infectados-hoy + 1 output-show (word "se infecta al tocar el objeto " x "-" y)]]
 
     set size 1
     set heading h
@@ -720,7 +726,7 @@ to pasa-un-dia
 end
 
 to Ingresa
-  if count turtles with [UCI = true] < Camillas-UCI [
+  ifelse count turtles with [UCI = true] < Camillas-UCI [
     output-show (word "INGRESA UCI (EDAD: " edad " SEXO: " genero ")")
     move-to one-of patches with [pcolor = orange and pxcor > 29]
     set UCI true
@@ -730,7 +736,7 @@ to Ingresa
     set label ""
     set estado 0
     set posicion-objetivo 0
-  ]
+  ][Muere]
 end
 
 to Muere
@@ -902,7 +908,7 @@ SLIDER
 %_de_guantes
 0
 100
-94.0
+0.0
 1
 1
 NIL
@@ -917,7 +923,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-72.0
+0.0
 1
 1
 NIL
@@ -1001,7 +1007,7 @@ Camillas-UCI
 Camillas-UCI
 1
 50
-10.0
+15.0
 1
 1
 NIL
@@ -1201,7 +1207,7 @@ numero-productos
 numero-productos
 3
 15
-10.0
+15.0
 1
 1
 NIL
@@ -1237,7 +1243,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-10.0
+0.0
 1
 1
 %
@@ -1370,7 +1376,7 @@ INPUTBOX
 707
 756
 hora-cierre
-22.0
+19.0
 1
 0
 Number
