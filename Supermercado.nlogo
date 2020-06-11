@@ -18,7 +18,6 @@ globals[
   curados-total
   UCI-total
   afectados
-  limite-infectado
   dia
   ticks-dia
   UCI-hasta-los-15-dias
@@ -115,8 +114,6 @@ to setup
   ask patches with [pcolor = blue] [set esMuro true] ; Asignar muros
   ask patches [set pcarga-virica 0] ; Inicializamos la carga virica de los muros
 
-  set limite-infectado 10 ; Limite para considerarse infecatado
-
   ; Dependientes y su espacio de trabajo
   ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
   create-dependientes 5 [
@@ -168,7 +165,7 @@ end
 
 ; cambiar label de las personas
 to cambiar-label-color
-  ifelse tcarga-virica > limite-infectado [set color 16][set color 87]
+  ifelse tcarga-virica > 0 [set color 16][set color 87]
   let l ""
   set l word l tcarga-virica
   if mascarilla [set l word "M-" l ]
@@ -222,7 +219,7 @@ to go
       set UCI-hoy 0
 
       ; Actualizamos estadisticas afectados totales
-      set afectados count personas with[tcarga-virica > limite-infectado or UCI or muerto or curado]
+      set afectados count personas with[tcarga-virica > 0 or UCI or muerto or curado]
 
     ]
 
@@ -240,7 +237,7 @@ to go
 
 
     ; Comprobación extra por si acaso no se ha coloreado algun enfermo
-    ask turtles with [tcarga-virica > 0 and breed != particulas ] [cambiar-label-color] ; colorear a  los enfermos
+    ask turtles with [tcarga-virica > 0 and color != 16 and breed != particulas ] [cambiar-label-color] ; colorear a  los enfermos
 
     ; Colorear muros segun carga virica
     ask patches with [esMuro = true and member? pcarga-virica (range 1 5)] [set pcolor 19]
@@ -290,21 +287,19 @@ to go
     ] [
 
       let hay-particula 0
-      let num-particulas 0
       let probabilidad-genero 0
       ifelse genero = "M" [set probabilidad-genero random 100][set probabilidad-genero random 130]
       if probabilidad-genero > 30 [ ; menor probabilidad de contagio en hombres
         ask particulas in-cone 1 180 [
-          set hay-particula 1 set num-particulas count particulas in-cone 1 180 die
+          set hay-particula 1 die
         ]
 
         if hay-particula = 1[ ;se pone este random por la probabilidad de respirar la particula
           set tcarga-virica tcarga-virica + 1
           cambiar-label-color
-          if infectado = false and tcarga-virica > limite-infectado [
+          if infectado = false [
             set infectado true set infectados-hoy infectados-hoy + 1
             output-show "se infecta con partícula en el aire"
-
           ]
         ]
       ]
@@ -390,7 +385,6 @@ to estornuda
         set shape "circle"
         set size random-float 0.25
         set label ""
-        set color red
 
 
         ;set vel-y 10 - (random-float 20) ; velocidad y inicial
@@ -491,13 +485,11 @@ to mirar-objetos-cercanos
   let y 0
   let h heading
   let muro-infectado false
-  let pcantidad-infeccion 0
   ask patch-here [
     ask neighbors4 with [esMuro = true][
       set x pxcor
       set y pycor
-
-      set pcantidad-infeccion pcarga-virica
+      set muro-infectado pcarga-virica > 0
     ]
   ]
   if x != 0 and random 100 > 90 [
@@ -520,10 +512,8 @@ to mirar-objetos-cercanos
 
 
     ; Contagiar/se objeto en estanteria al tocarlo sin guantes
-    let tcantidad-infeccion tcarga-virica
-
-    if (guantes = false or mascarilla = false) and not curado [ask patch x y [set pcarga-virica pcarga-virica + random tcantidad-infeccion]  output-show (word "infecta el objeto " x "-" y)]
-    if guantes = false and pcantidad-infeccion > 0 and not curado [set tcarga-virica tcarga-virica + random pcantidad-infeccion cambiar-label-color if infectado = false and tcarga-virica > limite-infectado [set infectado true set infectados-hoy infectados-hoy + 1 output-show (word "se infecta al tocar el objeto " x "-" y)]]
+    if tcarga-virica > random 20 and (guantes = false or mascarilla = false) and not curado [ask patch x y [set pcarga-virica pcarga-virica + 1]  output-show (word "infecta el objeto " x "-" y)]
+    if guantes = false and muro-infectado and not curado [set tcarga-virica tcarga-virica + 1 cambiar-label-color if infectado = false [set infectado true set infectados-hoy infectados-hoy + 1 output-show (word "se infecta al tocar el objeto " x "-" y)]]
 
     set size 1
     set heading h
@@ -662,7 +652,7 @@ to pasa-un-dia
   set dia dia + 1
 
   ; no se mete a los dependientes en el grupo de estudio, por l ok se resetean a los 7 dias si estan infectados
-  ask dependientes with [tcarga-virica > limite-infectado][
+  ask dependientes with [tcarga-virica > 0][
     set dias dias + 1
     if dias = 7 [
       set tcarga-virica 0
@@ -670,7 +660,7 @@ to pasa-un-dia
     ]
   ]
 
-  ask personas with [breed != particulas and tcarga-virica > limite-infectado and not muerto and not curado and xcor > 29] [
+  ask personas with [breed != particulas and tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
     set dias dias + 1
 
     ifelse genero = "M" [
@@ -785,7 +775,7 @@ end
 
 to dibujar-graficas
   ask one-of turtles [
-    set-current-plot _clarify-duplicate-plot-name "Gráfica diaria"
+    set-current-plot "Gráfica diaria"
     set-current-plot-pen "Infectados"
     plotxy ticks / ticks-dia  infectados-hoy
     set-current-plot-pen "UCI"
@@ -797,16 +787,6 @@ to dibujar-graficas
 
   ]
 
-end
-
-to-report _clarify-duplicate-plot-name [ name ]
-  let name-map [["Gráfica acumulada (Actualización diaria)" "Gráfica acumulada (Actualización diaria)"] ["Gráfica acumulada (Actualización diaria)" "Gráfica acumulada (Actualización diaria)_1"]]
-  let replacement filter [ rename -> first rename = name ] name-map
-  let reported-name name
-  if not empty? replacement [
-    set reported-name item 1 (item 0 replacement)
-  ]
-  report reported-name
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -949,7 +929,7 @@ BUTTON
 152
 43
 NIL
-go
+go\n
 T
 1
 T
@@ -1098,7 +1078,7 @@ PLOT
 876
 1277
 1119
-Gráfica acumulada (Actualización diaria)_1
+Gráfica acumulada (Actualización diaria)
 Día
 Personas
 0.0
@@ -1233,7 +1213,7 @@ MONITOR
 124
 814
 Afectados actuales
-count personas with [tcarga-virica > limite-infectado]
+count personas with [tcarga-virica > 0]
 2
 1
 14
@@ -1416,27 +1396,6 @@ Cierra-domingo
 0
 1
 -1000
-
-PLOT
-847
-852
-1303
-1095
-Gráfica acumulada (Actualización diaria)_1
-Día
-Personas
-0.0
-60.0
-0.0
-500.0
-true
-true
-"" ""
-PENS
-"Infectados" 1.0 0 -2674135 true "" "plotxy dia infectados-total"
-"Curados" 1.0 0 -13840069 true "" "plotxy dia curados-total"
-"UCI" 1.0 0 -955883 true "" "plotxy dia UCI-total"
-"Fallecidos" 1.0 0 -16777216 true "" "plotxy dia muertos-total"
 
 @#$#@#$#@
 ## WHAT IS IT?
