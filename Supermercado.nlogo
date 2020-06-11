@@ -839,7 +839,7 @@ Aforo
 Aforo
 0
 50
-30.0
+17.0
 1
 1
 NIL
@@ -884,7 +884,7 @@ SLIDER
 %_de_mascarillas
 0
 100
-85.0
+72.0
 1
 1
 NIL
@@ -916,7 +916,7 @@ num-particles
 num-particles
 5
 10
-7.0
+6.0
 1
 1
 NIL
@@ -931,7 +931,7 @@ SLIDER
 %contagio_inicial
 1
 100
-45.0
+5.0
 1
 1
 NIL
@@ -1095,10 +1095,10 @@ PENS
 "Fallecidos" 1.0 1 -16777216 true "" ""
 
 MONITOR
-490
-625
-563
-682
+493
+628
+566
+685
 Día
 ifelse-value dia mod 7 = 1[\"Lunes\"]\n [ifelse-value dia mod 7 = 2[\"Martes\"]\n  [ifelse-value dia mod 7 = 3[\"Miércoles\"]\n   [ifelse-value dia mod 7 = 4[\"Jueves\"]\n    [ifelse-value dia mod 7 = 5[\"Viernes\"]\n     [ifelse-value dia mod 7 = 6[\"Sábado\"]\n      [ifelse-value dia mod 7 = 0[\"Domingo\"][\"\"]]]]]]]
 0
@@ -1183,7 +1183,7 @@ mascarilla_mal_colocada
 mascarilla_mal_colocada
 0
 100
-19.0
+25.0
 1
 1
 %
@@ -1278,10 +1278,10 @@ mascarillas-dependientes
 -1000
 
 MONITOR
+630
 627
-624
+687
 684
-681
 Horas
 horas
 0
@@ -1289,10 +1289,10 @@ horas
 14
 
 MONITOR
-685
-624
-755
-681
+688
+627
+758
+684
 Minutos
 minutos
 2
@@ -1300,10 +1300,10 @@ minutos
 14
 
 INPUTBOX
-547
-693
-625
-753
+550
+696
+628
+756
 hora-apertura
 9.0
 1
@@ -1311,21 +1311,21 @@ hora-apertura
 Number
 
 INPUTBOX
-626
-693
-704
-753
+629
+696
+707
+756
 hora-cierre
-12.0
+22.0
 1
 0
 Number
 
 MONITOR
-567
-624
-624
-681
+570
+627
+627
+684
 Día
 dia
 17
@@ -1333,10 +1333,10 @@ dia
 14
 
 SWITCH
-562
-757
-690
-790
+565
+760
+693
+793
 Cierra-domingo
 Cierra-domingo
 0
@@ -1354,7 +1354,7 @@ Modelo de un supermercado generico en el contexto de la crisis desatada por la p
 * Setup: para inicializar el mundo el mundo
 * go: para ejecutar la simulación
 
-### La simulación presenta 13 sliders:
+### La simulación presenta sliders para ajustar los parámetros:
 
 * poblacion: numero de personas sobre las que se realizara el estudio.
 * % de contagio inicial:  establece el numero de contagios que hay inicialmente.
@@ -1368,7 +1368,9 @@ Modelo de un supermercado generico en el contexto de la crisis desatada por la p
 * ancho-pasillo: considerando como 1 un pasillo basico donde la salida del aire esta mas concentrada, reducira el tiempo de vida de las particulas. Siendo 2 un pasillo mas ancho con el aire un poco mas distribuido.
 * numero-productos: establece el numero maximo de productos que puede comprar el cliente, controlado de esta forma el timepo que pasara en el supermercado.
 * % de mascarillas: establece el numero de personas que tendran mascarillas.
-* mascarilla_mal_colocada: probabilidad de colocarse la mascarilla de forma inadeacuada, de modo que no evitará la propagación de partículas al estornudar
+* mascarilla_mal_colocada: probabilidad de colocarse la mascarilla de forma inadeacuada, de modo que no evitará la propagación de partículas al estornudar.
+* Hora de apertura y hora de cierre: establece el horario del supermercado.
+* Cierra domingo: interruptor que determina si el domingo no abre el supermercado.
 ### Tipos de mascarilla (prob_contagio_mascarilla)
 * Quirúrgicas: son las más comunes y usadas entre los ciudadanos. Se ha demostrado que no son eficaces para evitar el contagio si hay partículas en el aire, pero ayudan a retener y no propagar estas partículas al toser o estornudar.
 * FFP1 (filtro  de  partículas  tipo  P1):  tienen  una  eficacia  de  filtración  mínima  del  78%.  Suelen emplearse frente a partículas de material inerte, y no se recomiendan para uso médico.
@@ -1406,7 +1408,7 @@ Para ejecutar correctamente la simulación, se deben establecer los parametros d
 
 ## NETLOGO FEATURES
 
-* Gestión del tiempo: se ha estimado la duración de un día en 300 ticks, de forma que se pueda ralentizar el tiempo y apreciar el movimiento de los agentes. 
+* Gestión del tiempo: se ha estimado la duración de un día en 4320 ticks, es decir, 180 ticks por hora, De forma que se pueda ralentizar el tiempo y apreciar el movimiento de los agentes. Se puede establecer el horario de apertura del supermercado y si cierra los domingos, por lo que, cuando el supermercado está cerrado, pasan las horas más rápido al tener que hacer menos cálculos. No obstante, durante el periodo de cierre, el tiempo y las estadísticas siguen actualizándose.
 
 * Lista de la compra: El tiempo de estancia de la persona en el supermercado, viene determinado por el número máximo de productos que va a adquirir (regulable entre 3 y 15 mediante un slider).
 
