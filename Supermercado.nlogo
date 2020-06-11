@@ -59,6 +59,7 @@ personas-own[
   espera
 ]
 
+
 ; las diferentes razas
 breed [particulas particula]
 breed [personas persona]
@@ -110,7 +111,7 @@ to setup
   ; Dependientes y su espacio de trabajo
   ask patches with [pycor > 2 and pycor < 6 and (member? pxcor [6 10 14 18 22])] [set pcolor yellow]
   create-dependientes 5 [
-    set shape "person"
+    ;set shape "person"
     set ycor 4
     set color 87
     set xcor 7 + who * 4
@@ -200,7 +201,6 @@ to go
     ; Actualizamos estadisticas afectados totales
     set afectados count personas with[tcarga-virica > 0 or UCI or muerto or curado]
 
-
   ]
 
   ; Comprobación extra por si acaso no se ha coloreado algun enfermo
@@ -225,7 +225,7 @@ to go
 
   ; Contagio por contacto con particula en aire. Marcar a infectado si no lo está
   let efectividad 0 ;
-  if tipo_mascarilla = "Quirurjica" [set efectividad 10]
+  if tipo_mascarilla = "Quirurjica" or tipo_mascarilla = true [set efectividad 10]
   if tipo_mascarilla = "FFP1" [set efectividad 78]
   if tipo_mascarilla = "FFP2" [set efectividad 92]
   if tipo_mascarilla = "FFP3" [set efectividad 98]
@@ -317,22 +317,28 @@ to estornuda
     let direccion heading
     let efectividad 0
     if mascarilla = true [set efectividad 100 - mascarilla_mal_colocada] ; Probabilidad de colocarse mal la mascarilla y que sea inefectiva
+    let es_dependiente breed = dependientes ; Ha estornudado un dependiente?
     if efectividad < random 100 [
       hatch-particulas num-particles * tcarga-virica / 10 [
+
         let acel-x 20
-        let acel-y 30
+        let acel-y 5
         ;Particula dirigida hacia donde mira la persona que estornuda
         if direccion = 0 [set vel-x random 15 - 7  set vel-y (random-float 1) * acel-y]
         if direccion = 90 [set vel-x (random-float 1) * acel-x  set vel-y random 15 - 7]
         if direccion = 270 [set vel-x random 15 - 7 set vel-y (random-float 1 - 1) * acel-y]
-        if direccion = -90 [set vel-x (random-float 1 - 1) * acel-x set vel-y random 15 - 7]
+        if direccion = -90 [set vel-x random-float 1 * -1 * acel-x set vel-y random 15 - 7]
 
-        ;set vel-y 10 - (random-float 20) ; velocidad y inicial
+        ; Dependientes estornudan mirando a la izqda
+        if es_dependiente [set vel-x -30 set vel-y 0]
         set vida 0
         set shape "circle"
-        set size random-float 0.3
-        set color red
+        set size random-float 0.25
         set label ""
+
+
+        ;set vel-y 10 - (random-float 20) ; velocidad y inicial
+
       ]
     ]
 
@@ -775,7 +781,7 @@ Ventilación
 Ventilación
 0
 15
-8.0
+7.0
 1
 1
 NIL
