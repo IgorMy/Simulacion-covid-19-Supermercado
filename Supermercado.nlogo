@@ -785,7 +785,7 @@ end
 
 to dibujar-graficas
   ask one-of turtles [
-    set-current-plot "Gráfica diaria"
+    set-current-plot _clarify-duplicate-plot-name "Gráfica diaria"
     set-current-plot-pen "Infectados"
     plotxy ticks / ticks-dia  infectados-hoy
     set-current-plot-pen "UCI"
@@ -797,6 +797,16 @@ to dibujar-graficas
 
   ]
 
+end
+
+to-report _clarify-duplicate-plot-name [ name ]
+  let name-map [["Gráfica acumulada (Actualización diaria)" "Gráfica acumulada (Actualización diaria)"] ["Gráfica acumulada (Actualización diaria)" "Gráfica acumulada (Actualización diaria)_1"]]
+  let replacement filter [ rename -> first rename = name ] name-map
+  let reported-name name
+  if not empty? replacement [
+    set reported-name item 1 (item 0 replacement)
+  ]
+  report reported-name
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -939,7 +949,7 @@ BUTTON
 152
 43
 NIL
-go\n
+go
 T
 1
 T
@@ -974,7 +984,7 @@ SLIDER
 %contagio_inicial
 1
 100
-8.0
+5.0
 1
 1
 NIL
@@ -1088,7 +1098,7 @@ PLOT
 876
 1277
 1119
-Gráfica acumulada (Actualización diaria)
+Gráfica acumulada (Actualización diaria)_1
 Día
 Personas
 0.0
@@ -1412,7 +1422,7 @@ PLOT
 852
 1303
 1095
-Gráfica acumulada (Actualización diaria)
+Gráfica acumulada (Actualización diaria)_1
 Día
 Personas
 0.0
