@@ -179,6 +179,10 @@ end
 ; metodo go
 
 to go
+
+  ; parar la simulación al final del dia 60
+    if ticks = ticks-dia * 60 [ stop ]
+
   ; HACER DURANTE SUPERMERCADO CERRADO
   ; CONSIDERAR SI CIERRA EL DOMINGO
   ifelse horas >= hora-cierre or horas < hora-apertura or (cierra-domingo and dia mod 7 = 0) [
@@ -224,8 +228,6 @@ to go
     tick
   ]; HACER DURANTE SUPERMERCADO ABIERTO
   [
-    ; parar la simulación al final del dia 60
-    if ticks = ticks-dia * 60 [ stop ]
 
     ; Gestión tiempo
     if ticks mod 3 = 0 [set minutos minutos + 1]
@@ -292,7 +294,7 @@ to go
           set hay-particula 1 die
         ]
 
-        if hay-particula = 1 [
+        if hay-particula = 1 and random 100 > 70[ ;se pone este random por la probabilidad de respirar la particula
           set tcarga-virica tcarga-virica + 1
           cambiar-label-color
           if infectado = false [
@@ -361,7 +363,7 @@ end
 ; estornudo del agente
 
 to estornuda
-    set ha-estornudado 10
+    set ha-estornudado 30
     let direccion heading
     let efectividad 0
     if mascarilla = true [set efectividad 100 - mascarilla_mal_colocada] ; Probabilidad de colocarse mal la mascarilla y que sea inefectiva
@@ -648,6 +650,16 @@ to pasa-un-dia
   set horas 0
   set minutos 0
   set dia dia + 1
+
+  ; no se mete a los dependientes en el grupo de estudio, por l ok se resetean a los 7 dias si estan infectados
+  ask dependientes with [tcarga-virica > 0][
+    set dias dias + 1
+    if dias = 7 [
+      set tcarga-virica 0
+      cambiar-label-color
+    ]
+  ]
+
   ask personas with [breed != particulas and tcarga-virica > 0 and not muerto and not curado and xcor > 29] [
     set dias dias + 1
 
@@ -802,7 +814,7 @@ GRAPHICS-WINDOW
 0
 1
 ticks
-500.0
+800.0
 
 BUTTON
 17
@@ -860,7 +872,7 @@ Aforo
 Aforo
 0
 50
-17.0
+15.0
 1
 1
 NIL
