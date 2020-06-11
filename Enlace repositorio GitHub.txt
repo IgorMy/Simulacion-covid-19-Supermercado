@@ -1,1 +1,1 @@
-https://github.com/IgorMy/Example-of-COVID19-in-Netlogo
+https://github.com/IgorMy/Simulacion-covid-19-Supermercado
